@@ -4,7 +4,21 @@ import { defineConfig } from 'vite';
 
 export default defineConfig({
 	plugins: [sveltekit()],
-
+	server: {
+		// Enable HMR on localhost
+		hmr: {
+			clientPort: 5173
+		},
+		// Add service worker build to dev server
+		fs: {
+			strict: false,
+			allow: ['..']
+		}
+	},
+	build: {
+		// Enable source maps for better debugging
+		sourcemap: true
+	},
 	test: {
 		workspace: [
 			{
