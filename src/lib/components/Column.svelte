@@ -119,7 +119,7 @@
     background-color: #f5f5f5;
     border-radius: 5px;
     flex: 1;
-    min-width: 280px;
+    min-width: 220px;
     max-width: 350px;
     min-height: 300px;
     display: flex;

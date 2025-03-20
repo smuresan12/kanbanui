@@ -1,38 +1,107 @@
-# sv
+# Svelte Kanban
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
+A local-first Kanban board built with Svelte, TypeScript, and PWA features. This application allows you to organize your tasks visually in a Kanban-style board with drag-and-drop functionality.
 
-## Creating a project
+![Kanban Board](https://i.imgur.com/dummy-screenshot-link.png)
 
-If you're seeing this, you've probably already done this step. Congrats!
+## Features
 
-```bash
-# create a new project in the current directory
-npx sv create
+- 🚀 **Local-first**: All data is stored in your browser
+- 📱 **PWA support**: Works offline with caching
+- 🎨 **Colorful stickies**: Organize tasks with color coding
+- 🔄 **Drag and drop**: Move tasks between columns
+- 🧹 **Auto-cleanup**: Prompts to remove old completed tasks
+- 📐 **Responsive design**: Works on desktop and mobile
 
-# create a new project in my-app
-npx sv create my-app
-```
+## Columns
 
-## Developing
+The board has four predefined columns:
+- Backlog
+- To Do
+- In Progress
+- Done
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+## Getting Started
 
-```bash
-npm run dev
+### Development
 
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
-```
+1. Clone this repository:
+   ```bash
+   git clone https://github.com/yourusername/svelte-kanban.git
+   cd svelte-kanban
+   ```
 
-## Building
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
 
-To create a production version of your app:
+3. Start the development server:
+   ```bash
+   npm run dev
+   ```
+
+4. Open your browser and navigate to `http://localhost:5173`
+
+### Building for Production
+
+To create a production version:
 
 ```bash
 npm run build
 ```
 
-You can preview the production build with `npm run preview`.
+You can preview the production build with:
 
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+```bash
+npm run preview
+```
+
+## Deployment
+
+This app is configured to deploy to GitHub Pages using GitHub Actions. The workflow is set up to:
+
+1. Build the application when changes are pushed to the main branch
+2. Deploy the built files to GitHub Pages
+
+To set this up for your own repository:
+
+1. Fork or clone this repository
+2. In your GitHub repository settings, enable GitHub Pages
+3. Set the source to "GitHub Actions"
+4. Push changes to the main branch to trigger a deployment
+
+## How to Use
+
+### Adding Tasks
+
+1. Click the "+" button in any column
+2. Enter task text
+3. Choose a color (or use the default)
+4. Click "Add" or press Enter
+
+### Moving Tasks
+
+Drag and drop tasks between columns to update their status.
+
+### Editing Tasks
+
+1. Click the edit (✏️) button on a task
+2. Update text and/or color
+3. Click "Save" or press Enter
+
+### Deleting Tasks
+
+Click the delete (🗑️) button on a task to remove it.
+
+### Old Task Cleanup
+
+When opening the app, it checks for tasks in the "Done" column that are older than 100 days and asks if you want to delete them.
+
+## License
+
+MIT
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
