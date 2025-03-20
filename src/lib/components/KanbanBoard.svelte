@@ -66,6 +66,8 @@
     height: 100%;
     padding: 20px;
     background-color: #f9f9f9;
+    width: 100%;
+    box-sizing: border-box;
   }
   
   .board-header {
@@ -77,6 +79,7 @@
     margin: 0;
     color: #333;
     font-size: 28px;
+    font-family: 'Comic Sans MS', cursive, sans-serif;
   }
   
   .board {
@@ -86,7 +89,9 @@
     padding-bottom: 20px;
     height: calc(100% - 80px);
     align-items: flex-start;
-    gap: 10px;
+    gap: 20px;
+    width: 100%;
+    justify-content: space-between;
   }
   
   /* Scrollbar styling */

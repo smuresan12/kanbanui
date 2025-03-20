@@ -69,33 +69,38 @@
   
   .modal {
     background-color: white;
-    border-radius: 5px;
-    padding: 20px;
+    border-radius: 10px;
+    padding: 25px;
     width: 90%;
-    max-width: 500px;
+    max-width: 550px;
     max-height: 80vh;
     overflow-y: auto;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 5px 25px rgba(0, 0, 0, 0.3);
+    font-family: 'Comic Sans MS', cursive, sans-serif;
   }
   
   h2 {
     margin-top: 0;
-    border-bottom: 1px solid #eee;
-    padding-bottom: 10px;
+    border-bottom: 2px dashed #eee;
+    padding-bottom: 15px;
+    font-size: 24px;
+    color: #333;
   }
   
   .stickies-list {
-    max-height: 200px;
+    max-height: 250px;
     overflow-y: auto;
-    margin: 15px 0;
-    padding: 10px;
-    border: 1px solid #eee;
-    border-radius: 4px;
+    margin: 20px 0;
+    padding: 15px;
+    border: 2px dashed #ccc;
+    border-radius: 8px;
+    background-color: #f9f9f9;
   }
   
   h3 {
     margin-top: 0;
-    font-size: 16px;
+    font-size: 18px;
+    color: #555;
   }
   
   ul {
@@ -105,42 +110,66 @@
   }
   
   li {
-    padding: 8px 12px;
-    margin-bottom: 8px;
-    border-radius: 3px;
+    padding: 12px 15px;
+    margin-bottom: 12px;
+    border-radius: 5px;
     display: flex;
     flex-direction: column;
     font-family: 'Comic Sans MS', cursive, sans-serif;
+    box-shadow: 1px 2px 5px rgba(0, 0, 0, 0.1);
+    transform: rotate(-1deg);
+    border-bottom-right-radius: 20px 5px;
+  }
+  
+  li:nth-child(even) {
+    transform: rotate(1deg);
   }
   
   small {
     font-size: 12px;
     opacity: 0.7;
-    margin-top: 5px;
+    margin-top: 8px;
   }
   
   .modal-actions {
     display: flex;
     justify-content: flex-end;
-    gap: 10px;
-    margin-top: 20px;
+    gap: 15px;
+    margin-top: 25px;
   }
   
   .confirm-btn, .cancel-btn {
-    padding: 8px 15px;
+    padding: 10px 20px;
     border: none;
-    border-radius: 3px;
+    border-radius: 25px;
     cursor: pointer;
-    font-weight: 500;
+    font-weight: 600;
+    font-family: 'Comic Sans MS', cursive, sans-serif;
+    font-size: 16px;
+    transition: all 0.2s;
   }
   
   .confirm-btn {
     background-color: #f44336;
     color: white;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+  }
+  
+  .confirm-btn:hover {
+    background-color: #e53935;
+    transform: translateY(-3px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
   }
   
   .cancel-btn {
     background-color: #e0e0e0;
     color: #333;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+  }
+  
+  .cancel-btn:hover {
+    background-color: #d0d0d0;
+    transform: translateY(-3px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
   }
 </style> 

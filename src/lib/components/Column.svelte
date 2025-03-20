@@ -118,14 +118,16 @@
   .column {
     background-color: #f5f5f5;
     border-radius: 5px;
-    width: 300px;
+    flex: 1;
+    min-width: 280px;
+    max-width: 350px;
     min-height: 300px;
     display: flex;
     flex-direction: column;
-    padding: 10px;
-    margin: 0 10px;
+    padding: 15px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     box-sizing: border-box;
+    position: relative;
   }
   
   .column-header {
@@ -139,27 +141,31 @@
   
   .column-header h2 {
     margin: 0;
-    font-size: 18px;
+    font-size: 20px;
     font-weight: 600;
+    font-family: 'Comic Sans MS', cursive, sans-serif;
+    color: #333;
   }
   
   .add-sticky-btn {
     background: #e0e0e0;
     border: none;
-    width: 28px;
-    height: 28px;
+    width: 32px;
+    height: 32px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 20px;
+    font-size: 24px;
     cursor: pointer;
     color: #555;
-    transition: background-color 0.2s;
+    transition: all 0.2s;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
   }
   
   .add-sticky-btn:hover {
     background-color: #d0d0d0;
+    transform: scale(1.1);
   }
   
   .stickies {
@@ -168,6 +174,9 @@
     padding-right: 5px;
     width: 100%;
     box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
   }
   
   .add-sticky-form {

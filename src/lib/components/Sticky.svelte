@@ -119,30 +119,68 @@
   .sticky {
     position: relative;
     width: 100%;
-    margin-bottom: 10px;
+    margin-bottom: 0;
     padding: 15px;
-    border-radius: 3px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    border-radius: 2px;
+    box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.15);
+    transition: all 0.2s ease;
     cursor: grab;
     word-break: break-word;
     box-sizing: border-box;
+    transform: rotate(var(--rotate, -1deg));
+    --rotate: calc(-2deg + (Math.random() * 4deg));
+    border-bottom-right-radius: 60px 5px;
+    min-height: 100px;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .sticky::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 0 0 20px 20px;
+    border-color: transparent transparent rgba(0, 0, 0, 0.05) transparent;
+    border-bottom-right-radius: 6px;
+  }
+  
+  .sticky:nth-child(even) {
+    transform: rotate(1deg);
+  }
+  
+  .sticky:nth-child(3n) {
+    transform: rotate(-1.5deg);
+  }
+  
+  .sticky:nth-child(5n) {
+    transform: rotate(2deg);
   }
   
   .sticky:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    transform: scale(1.02) rotate(0deg);
+    box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.2);
+    z-index: 1;
   }
   
   .sticky-content {
     min-height: 50px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
   }
   
   .sticky p {
     margin: 0;
     font-family: 'Comic Sans MS', cursive, sans-serif;
     font-size: 16px;
-    line-height: 1.4;
+    line-height: 1.5;
+    color: rgba(0, 0, 0, 0.8);
+    text-shadow: 0.5px 0.5px 0px rgba(255, 255, 255, 0.5);
   }
   
   .sticky-controls {
@@ -164,82 +202,126 @@
     cursor: pointer;
     margin-left: 5px;
     padding: 2px;
-    font-size: 14px;
+    font-size: 16px;
     display: flex;
     align-items: center;
     justify-content: center;
-    min-width: 24px;
-    min-height: 24px;
+    min-width: 30px;
+    min-height: 30px;
+    border-radius: 50%;
+    transition: all 0.2s;
+    background-color: rgba(255, 255, 255, 0.3);
+  }
+  
+  .edit-btn:hover, .delete-btn:hover {
+    background-color: rgba(255, 255, 255, 0.6);
+    transform: scale(1.1);
   }
   
   .sticky-edit {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 12px;
+    width: 100%;
   }
   
   textarea {
     width: 100%;
-    min-height: 80px;
-    padding: 8px;
-    border: 1px solid #ccc;
+    min-height: 100px;
+    padding: 10px;
+    border: 1px dashed rgba(0, 0, 0, 0.2);
     border-radius: 3px;
     resize: vertical;
     font-family: 'Comic Sans MS', cursive, sans-serif;
     font-size: 16px;
+    background-color: rgba(255, 255, 255, 0.5);
   }
   
   .color-selector {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 10px;
   }
   
   .color-options {
     display: flex;
     flex-wrap: wrap;
-    gap: 5px;
+    gap: 8px;
   }
   
   .color-option {
-    width: 24px;
-    height: 24px;
+    width: 28px;
+    height: 28px;
     border-radius: 50%;
     border: 2px solid transparent;
     cursor: pointer;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    transition: all 0.15s;
   }
   
   .color-option.selected {
     border-color: #333;
+    transform: scale(1.15);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+  }
+  
+  .color-option:hover {
     transform: scale(1.1);
   }
   
   .color-input {
     display: flex;
     align-items: center;
-    gap: 5px;
+    gap: 8px;
+  }
+  
+  .color-input input[type="color"] {
+    border: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    cursor: pointer;
+    background: none;
   }
   
   .sticky-actions {
     display: flex;
     justify-content: flex-end;
-    gap: 8px;
+    gap: 10px;
+    margin-top: 5px;
   }
   
   .save-btn, .cancel-btn {
-    padding: 5px 10px;
+    padding: 6px 12px;
     border: none;
-    border-radius: 3px;
+    border-radius: 20px;
     cursor: pointer;
+    font-family: 'Comic Sans MS', cursive, sans-serif;
+    font-weight: bold;
+    transition: all 0.2s;
   }
   
   .save-btn {
     background-color: #4caf50;
     color: white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  }
+  
+  .save-btn:hover {
+    background-color: #45a049;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   }
   
   .cancel-btn {
     background-color: #f44336;
     color: white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  }
+  
+  .cancel-btn:hover {
+    background-color: #e53935;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   }
 </style> 
