@@ -12,6 +12,12 @@
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
     background-color: #f9f9f9;
     overscroll-behavior: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    overflow: hidden;
   }
   
   :global(*, *:before, *:after) {
@@ -27,5 +33,17 @@
     display: flex;
     flex-direction: column;
     flex: 1;
+    overflow: hidden;
+  }
+  
+  /* Add mobile-specific touch handling */
+  @media (max-width: 768px) {
+    :global(html) {
+      touch-action: manipulation;
+    }
+    
+    :global(input, button, textarea) {
+      font-size: 16px !important; /* Prevent iOS zoom on input focus */
+    }
   }
 </style>

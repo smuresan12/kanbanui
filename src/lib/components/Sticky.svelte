@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { createEventDispatcher } from 'svelte';
+  import { createEventDispatcher, onMount } from 'svelte';
   import type { Sticky } from '../types';
   import { kanbanStore } from '../stores/kanbanStore';
   
@@ -9,6 +9,7 @@
   let editableText = sticky.text;
   let editableColor = sticky.color;
   let usedColors: string[] = [];
+  let stickyElement: HTMLElement;
   
   const dispatch = createEventDispatcher<{
     delete: { id: string };
@@ -49,6 +50,34 @@
     }
   }
   
+  // Add touch events for mobile drag and drop
+  onMount(() => {
+    if (!stickyElement) return;
+    
+    let touchTimeout: ReturnType<typeof setTimeout>;
+    
+    stickyElement.addEventListener('touchstart', (e) => {
+      if (isEditing) return;
+      
+      // Long press to initiate drag
+      touchTimeout = setTimeout(() => {
+        stickyElement.setAttribute('draggable', 'true');
+        // Visual feedback that it's draggable
+        stickyElement.style.opacity = '0.7';
+      }, 300);
+    });
+    
+    stickyElement.addEventListener('touchend', () => {
+      clearTimeout(touchTimeout);
+      stickyElement.removeAttribute('draggable');
+      stickyElement.style.opacity = '1';
+    });
+    
+    stickyElement.addEventListener('touchmove', () => {
+      clearTimeout(touchTimeout);
+    });
+  });
+  
   // Clean up subscription
   import { onDestroy } from 'svelte';
   onDestroy(unsubscribe);
@@ -61,6 +90,7 @@
   on:dragstart={(e) => {
     e.dataTransfer?.setData('text/plain', sticky.id);
   }}
+  bind:this={stickyElement}
 >
   {#if isEditing}
     <div class="sticky-edit">
@@ -95,13 +125,13 @@
       </div>
       
       <div class="sticky-actions">
-        <button class="save-btn" on:click={handleSave}>Save</button>
         <button class="cancel-btn" on:click={() => {
           isEditing = false;
           editableText = sticky.text;
           editableColor = sticky.color;
           dispatch('editDone', { id: sticky.id });
         }}>Cancel</button>
+        <button class="save-btn" on:click={handleSave}>Save</button>
       </div>
     </div>
   {:else}
@@ -119,7 +149,7 @@
   .sticky {
     position: relative;
     width: 100%;
-    margin-bottom: 0;
+    margin: 0;
     padding: 15px;
     border-radius: 2px;
     box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.15);
@@ -130,9 +160,11 @@
     transform: rotate(var(--rotate, -1deg));
     --rotate: calc(-2deg + (Math.random() * 4deg));
     border-bottom-right-radius: 60px 5px;
-    min-height: 100px;
+    min-height: 80px;
     display: flex;
     flex-direction: column;
+    flex-shrink: 0;
+    touch-action: none; /* Improve touch handling */
   }
   
   .sticky::after {
@@ -323,5 +355,37 @@
     background-color: #e53935;
     transform: translateY(-2px);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  }
+  
+  /* Mobile optimizations */
+  @media (max-width: 768px) {
+    .sticky {
+      min-height: 70px;
+      padding: 12px;
+    }
+    
+    .sticky p {
+      font-size: 14px;
+    }
+    
+    .sticky-controls {
+      position: absolute;
+      bottom: 5px;
+      right: 5px;
+      background-color: rgba(255, 255, 255, 0.7);
+      border-radius: 15px;
+      padding: 3px;
+      opacity: 0.8;
+    }
+    
+    .sticky:active .sticky-controls {
+      opacity: 1;
+    }
+    
+    .edit-btn, .delete-btn {
+      min-width: 28px;
+      min-height: 28px;
+      font-size: 14px;
+    }
   }
 </style> 

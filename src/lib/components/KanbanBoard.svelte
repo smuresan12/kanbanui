@@ -63,16 +63,16 @@
   main {
     display: flex;
     flex-direction: column;
-    height: 100%;
-    padding: 20px;
-    background-color: #f9f9f9;
+    height: 100vh;
     width: 100%;
+    overflow: hidden;
     box-sizing: border-box;
   }
   
   .board-header {
-    margin-bottom: 20px;
+    padding: 15px;
     text-align: center;
+    flex-shrink: 0;
   }
   
   h1 {
@@ -84,14 +84,14 @@
   
   .board {
     display: flex;
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    padding-bottom: 20px;
-    height: calc(100% - 80px);
-    align-items: flex-start;
-    gap: 20px;
+    flex: 1;
     width: 100%;
-    justify-content: space-between;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 10px;
+    gap: 15px;
+    min-height: 0; /* Important for preventing overflow */
+    justify-content: stretch; /* Make columns stretch to fill width */
   }
   
   /* Scrollbar styling */
@@ -113,13 +113,37 @@
     background: #ccc;
   }
   
+  @media (max-width: 1024px) {
+    /* Below this breakpoint, switch to scrollable columns */
+    .board {
+      justify-content: flex-start; /* Allow columns to be scrollable */
+    }
+  }
+  
   @media (max-width: 768px) {
     .board {
-      padding-bottom: 10px;
+      padding: 8px;
+      gap: 8px;
+      flex-wrap: nowrap;
     }
     
     h1 {
-      font-size: 24px;
+      font-size: 22px;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    /* For very small screens, make header more compact */
+    .board-header {
+      padding: 8px;
+    }
+    
+    h1 {
+      font-size: 20px;
+    }
+    
+    .board {
+      gap: 12px;
     }
   }
 </style> 
