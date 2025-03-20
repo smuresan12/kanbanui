@@ -113,6 +113,50 @@ const createKanbanStore = () => {
       });
     },
     
+    // Reorder a sticky within the same column
+    reorderSticky: (draggedId: string, targetId: string, insertBefore: boolean = false) => {
+      update(state => {
+        // Find the sticky being dragged and the target sticky
+        const draggedSticky = state.stickies.find(s => s.id === draggedId);
+        const targetSticky = state.stickies.find(s => s.id === targetId);
+        
+        // If either sticky doesn't exist or they're not in the same column, do nothing
+        if (!draggedSticky || !targetSticky || draggedSticky.column !== targetSticky.column) {
+          return state;
+        }
+        
+        // Get stickies without the dragged sticky
+        const stickiesWithoutDragged = state.stickies.filter(s => s.id !== draggedId);
+        
+        // Find the index where the target sticky is
+        const targetIndex = stickiesWithoutDragged.findIndex(s => s.id === targetId);
+        
+        // Create a new array with the dragged sticky inserted at the correct position
+        let reorderedStickies;
+        if (insertBefore) {
+          // Insert before the target
+          reorderedStickies = [
+            ...stickiesWithoutDragged.slice(0, targetIndex),
+            draggedSticky,
+            ...stickiesWithoutDragged.slice(targetIndex)
+          ];
+        } else {
+          // Insert after the target (default behavior)
+          reorderedStickies = [
+            ...stickiesWithoutDragged.slice(0, targetIndex + 1),
+            draggedSticky,
+            ...stickiesWithoutDragged.slice(targetIndex + 1)
+          ];
+        }
+        
+        const newState = { ...state, stickies: reorderedStickies };
+        
+        // Save to localStorage
+        localStorage.setItem('kanban-state', JSON.stringify(newState));
+        return newState;
+      });
+    },
+    
     // Check for old stickies in the Done column (older than 100 days)
     getOldDoneStickies: () => {
       const state = loadState();
