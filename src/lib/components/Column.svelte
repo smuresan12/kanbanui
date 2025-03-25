@@ -222,7 +222,6 @@
   /* When empty, make the container fill the height for easier dropping */
   .stickies-container.empty {
     min-height: 100%;
-    border: 2px dashed transparent;
     border-radius: 5px;
     transition: all 0.2s ease;
   }
@@ -230,7 +229,6 @@
   /* Highlight when dragging over the empty container */
   .stickies-container.empty:hover,
   .stickies-container.empty:focus-within {
-    border-color: #ccc;
     background-color: rgba(0, 0, 0, 0.02);
   }
   
