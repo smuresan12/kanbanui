@@ -39,9 +39,22 @@
     
     // If we have any column changes, update them
     if (columnChanges.size > 0) {
+      // First update the column property for each moved sticky
       columnChanges.forEach((newColumn, stickyId) => {
-        kanbanStore.moveSticky(stickyId, newColumn as any); // Type assertion because TS doesn't know these are valid columns
+        kanbanStore.moveSticky(stickyId, newColumn as any);
       });
+      
+      // Update the column property in the items array to match the new column
+      const updatedItems = items.map((item: Sticky) => {
+        if (columnChanges.has(item.id)) {
+          return { ...item, column: column };
+        }
+        return item;
+      });
+      
+      // Then update the order of the entire column including the newly added sticky
+      // This ensures the sticky appears at the drop position, not at the top
+      kanbanStore.reorderColumn(column as any, updatedItems);
     } else {
       // If no columns changed, this is just a reordering within the column
       kanbanStore.reorderColumn(column as any, items);
