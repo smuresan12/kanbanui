@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { createEventDispatcher, onMount } from 'svelte';
+  import { createEventDispatcher } from 'svelte';
   import type { Sticky } from '../types';
   import { kanbanStore } from '../stores/kanbanStore';
   
@@ -9,7 +9,6 @@
   let editableText = sticky.text;
   let editableColor = sticky.color;
   let usedColors: string[] = [];
-  let stickyElement: HTMLElement;
   
   const dispatch = createEventDispatcher<{
     delete: { id: string };
@@ -50,34 +49,6 @@
     }
   }
   
-  // Add touch events for mobile drag and drop
-  onMount(() => {
-    if (!stickyElement) return;
-    
-    let touchTimeout: ReturnType<typeof setTimeout>;
-    
-    stickyElement.addEventListener('touchstart', (e) => {
-      if (isEditing) return;
-      
-      // Long press to initiate drag
-      touchTimeout = setTimeout(() => {
-        stickyElement.setAttribute('draggable', 'true');
-        // Visual feedback that it's draggable
-        stickyElement.style.opacity = '0.7';
-      }, 300);
-    });
-    
-    stickyElement.addEventListener('touchend', () => {
-      clearTimeout(touchTimeout);
-      stickyElement.removeAttribute('draggable');
-      stickyElement.style.opacity = '1';
-    });
-    
-    stickyElement.addEventListener('touchmove', () => {
-      clearTimeout(touchTimeout);
-    });
-  });
-  
   // Clean up subscription
   import { onDestroy } from 'svelte';
   onDestroy(unsubscribe);
@@ -86,11 +57,6 @@
 <div 
   class="sticky"
   style="background-color: {sticky.color};"
-  draggable={!isEditing}
-  on:dragstart={(e) => {
-    e.dataTransfer?.setData('text/plain', sticky.id);
-  }}
-  bind:this={stickyElement}
 >
   {#if isEditing}
     <div class="sticky-edit">
@@ -164,7 +130,6 @@
     display: flex;
     flex-direction: column;
     flex-shrink: 0;
-    touch-action: none; /* Improve touch handling */
   }
   
   .sticky::after {
@@ -250,142 +215,137 @@
     transform: scale(1.1);
   }
   
+  /* Sticky edit form styles */
   .sticky-edit {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
     width: 100%;
-  }
-  
-  textarea {
-    width: 100%;
-    min-height: 100px;
-    padding: 10px;
-    border: 1px dashed rgba(0, 0, 0, 0.2);
-    border-radius: 3px;
-    resize: vertical;
-    font-family: 'Comic Sans MS', cursive, sans-serif;
-    font-size: 16px;
-    background-color: rgba(255, 255, 255, 0.5);
-  }
-  
-  .color-selector {
+    height: 100%;
     display: flex;
     flex-direction: column;
     gap: 10px;
   }
   
-  .color-options {
+  .sticky-edit textarea {
+    width: 100%;
+    min-height: 80px;
+    padding: 8px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 3px;
+    resize: vertical;
+    font-family: 'Comic Sans MS', cursive, sans-serif;
+    font-size: 14px;
+    background-color: rgba(255, 255, 255, 0.9);
+  }
+  
+  .color-selector {
     display: flex;
-    flex-wrap: wrap;
+    flex-direction: column;
     gap: 8px;
   }
   
+  .color-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+  }
+  
   .color-option {
-    width: 28px;
-    height: 28px;
+    width: 24px;
+    height: 24px;
     border-radius: 50%;
     border: 2px solid transparent;
     cursor: pointer;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
-    transition: all 0.15s;
-  }
-  
-  .color-option.selected {
-    border-color: #333;
-    transform: scale(1.15);
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+    transition: all 0.2s;
+    padding: 0;
   }
   
   .color-option:hover {
     transform: scale(1.1);
   }
   
+  .color-option.selected {
+    border-color: rgba(0, 0, 0, 0.3);
+    transform: scale(1.1);
+  }
+  
   .color-input {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 5px;
+    margin-top: 5px;
   }
   
-  .color-input input[type="color"] {
+  .color-input input {
+    width: 20px;
+    height: 20px;
+    padding: 0;
     border: none;
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
     cursor: pointer;
-    background: none;
+  }
+  
+  .color-input label {
+    font-size: 12px;
+    color: rgba(0, 0, 0, 0.7);
   }
   
   .sticky-actions {
     display: flex;
     justify-content: flex-end;
-    gap: 10px;
-    margin-top: 5px;
+    gap: 5px;
+    margin-top: auto;
   }
   
-  .save-btn, .cancel-btn {
-    padding: 6px 12px;
+  .cancel-btn, .save-btn {
+    padding: 6px 10px;
     border: none;
-    border-radius: 20px;
+    border-radius: 3px;
+    font-size: 12px;
     cursor: pointer;
-    font-family: 'Comic Sans MS', cursive, sans-serif;
-    font-weight: bold;
     transition: all 0.2s;
   }
   
   .save-btn {
-    background-color: #4caf50;
+    background-color: rgba(0, 0, 0, 0.6);
     color: white;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   }
   
   .save-btn:hover {
-    background-color: #45a049;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    background-color: rgba(0, 0, 0, 0.8);
   }
   
   .cancel-btn {
-    background-color: #f44336;
-    color: white;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    background-color: rgba(0, 0, 0, 0.2);
+    color: rgba(0, 0, 0, 0.7);
   }
   
   .cancel-btn:hover {
-    background-color: #e53935;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    background-color: rgba(0, 0, 0, 0.3);
   }
   
-  /* Mobile optimizations */
+  /* Mobile-specific adjustments */
   @media (max-width: 768px) {
     .sticky {
-      min-height: 70px;
       padding: 12px;
+      min-height: 60px;
     }
     
     .sticky p {
       font-size: 14px;
     }
     
-    .sticky-controls {
-      position: absolute;
-      bottom: 5px;
-      right: 5px;
-      background-color: rgba(255, 255, 255, 0.7);
-      border-radius: 15px;
-      padding: 3px;
-      opacity: 0.8;
-    }
-    
-    .sticky:active .sticky-controls {
-      opacity: 1;
-    }
-    
     .edit-btn, .delete-btn {
-      min-width: 28px;
-      min-height: 28px;
+      min-width: 24px;
+      min-height: 24px;
       font-size: 14px;
+    }
+    
+    .sticky-edit textarea {
+      min-height: 60px;
+      font-size: 14px;
+    }
+    
+    .cancel-btn, .save-btn {
+      padding: 5px 8px;
+      font-size: 12px;
     }
   }
 </style> 

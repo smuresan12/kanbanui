@@ -18,6 +18,36 @@
     }, {} as Record<string, Sticky[]>);
   });
   
+  function handleColumnDndConsider(e: CustomEvent, column: string) {
+    const { items } = e.detail;
+    stickiesByColumn[column] = items;
+  }
+  
+  function handleColumnDndFinalize(e: CustomEvent, column: string) {
+    const { items } = e.detail;
+    
+    // Create a map of sticky IDs to new column
+    const columnChanges = new Map<string, string>();
+    
+    // For each sticky in this column, check if it needs to be moved
+    items.forEach((item: Sticky) => {
+      if (item.column !== column) {
+        // This item has been dragged from another column
+        columnChanges.set(item.id, column);
+      }
+    });
+    
+    // If we have any column changes, update them
+    if (columnChanges.size > 0) {
+      columnChanges.forEach((newColumn, stickyId) => {
+        kanbanStore.moveSticky(stickyId, newColumn as any); // Type assertion because TS doesn't know these are valid columns
+      });
+    } else {
+      // If no columns changed, this is just a reordering within the column
+      kanbanStore.reorderColumn(column as any, items);
+    }
+  }
+  
   // Check for old stickies in the Done column on mount
   onMount(() => {
     // Check if we have old stickies
@@ -46,6 +76,8 @@
       <Column 
         {column} 
         stickies={stickiesByColumn[column] || []} 
+        on:consider={e => handleColumnDndConsider(e, column)}
+        on:finalize={e => handleColumnDndFinalize(e, column)}
       />
     {/each}
   </div>

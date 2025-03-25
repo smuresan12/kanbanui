@@ -2,6 +2,9 @@
   import type { Column as ColumnType, Sticky as StickyType } from '../types';
   import Sticky from './Sticky.svelte';
   import { kanbanStore } from '../stores/kanbanStore';
+  import { dndzone, SHADOW_ITEM_MARKER_PROPERTY_NAME } from 'svelte-dnd-action';
+  import { flip } from 'svelte/animate';
+  import { createEventDispatcher } from 'svelte';
   
   export let column: ColumnType;
   export let stickies: StickyType[] = [];
@@ -9,10 +12,10 @@
   let isAddingSticky = false;
   let newStickyText = '';
   let newStickyColor = '#ffcc00';
-  let isDragOver = false;
   let editingStickyId: string | null = null;
-  let columnEl: HTMLElement;
-  let stickiesContainerEl: HTMLElement;
+  
+  const flipDurationMs = 200;
+  const dispatch = createEventDispatcher();
   
   function handleAddSticky() {
     if (newStickyText.trim()) {
@@ -26,102 +29,39 @@
     kanbanStore.deleteSticky(event.detail.id);
   }
   
-  function handleDragOver(event: DragEvent) {
-    event.preventDefault();
-    
-    // If the column is empty or we're dragging over the column but not a sticky
-    if (stickies.length === 0 || event.currentTarget === columnEl || event.currentTarget === stickiesContainerEl) {
-      isDragOver = true;
-    }
+  interface DndEventDetail {
+    items: StickyType[];
+    info: {
+      id: string;
+    };
   }
   
-  function handleDragLeave(event: DragEvent) {
-    // Only set isDragOver to false if we're leaving the column itself
-    if (event.currentTarget === columnEl || event.currentTarget === stickiesContainerEl) {
-      isDragOver = false;
+  function handleDndConsider(e: CustomEvent<DndEventDetail>) {
+    // Update list when user is dragging
+    const { items } = e.detail;
+    // Only update if the items are for this column
+    if (items.some((item: StickyType) => item.column === column)) {
+      stickies = items.filter((item: StickyType) => item.column === column);
     }
+    // Forward the event to the parent
+    dispatch('consider', e.detail);
   }
   
-  function handleDrop(event: DragEvent) {
-    event.preventDefault();
-    isDragOver = false;
+  function handleDndFinalize(e: CustomEvent<DndEventDetail>) {
+    // Finalize the reordering after drag is complete
+    const { items } = e.detail;
     
-    const stickyId = event.dataTransfer?.getData('text/plain');
-    if (stickyId) {
-      // If we're dropping directly on the column, move the sticky to this column
-      kanbanStore.moveSticky(stickyId, column);
-    }
-  }
-  
-  function handleStickyDragOver(event: DragEvent, stickyId: string) {
-    event.preventDefault();
-    // Add a class to indicate where the sticky will be dropped
-    const target = event.currentTarget as HTMLElement;
-    
-    // Get the dragged sticky ID
-    const draggedId = event.dataTransfer?.types.includes('text/plain') 
-      ? event.dataTransfer?.getData('text/plain') 
-      : null;
-    
-    // If we're dragging onto ourselves, do nothing
-    if (draggedId === stickyId) {
-      target.classList.remove('drag-over-top', 'drag-over-bottom');
-      return;
+    // Only update the store if we're reordering within the same column
+    if (items.some((item: StickyType) => item.column === column)) {
+      // Filter items to only include the ones for this column
+      const columnItems = items.filter((item: StickyType) => item.column === column);
+      
+      // Update the store with the reordered items
+      kanbanStore.reorderColumn(column, columnItems);
     }
     
-    // Determine if we're hovering over the top or bottom half
-    const rect = target.getBoundingClientRect();
-    const mouseY = event.clientY;
-    const threshold = rect.top + rect.height / 2;
-    
-    target.classList.remove('drag-over-top', 'drag-over-bottom');
-    if (mouseY < threshold) {
-      target.classList.add('drag-over-top');
-    } else {
-      target.classList.add('drag-over-bottom');
-    }
-  }
-  
-  function handleStickyDragLeave(event: DragEvent) {
-    const target = event.currentTarget as HTMLElement;
-    target.classList.remove('drag-over-top', 'drag-over-bottom');
-  }
-  
-  function handleStickyDrop(event: DragEvent, targetStickyId: string) {
-    event.preventDefault();
-    const target = event.currentTarget as HTMLElement;
-    const isTopHalf = target.classList.contains('drag-over-top');
-    target.classList.remove('drag-over-top', 'drag-over-bottom');
-    
-    const draggedStickyId = event.dataTransfer?.getData('text/plain');
-    if (!draggedStickyId) return;
-    
-    // If the sticky is being dropped on itself, do nothing
-    if (draggedStickyId === targetStickyId) return;
-    
-    // Get the dragged sticky
-    const draggedSticky = stickies.find(s => s.id === draggedStickyId);
-    
-    // If the sticky is from another column, just move it to this column
-    if (!draggedSticky || draggedSticky.column !== column) {
-      kanbanStore.moveSticky(draggedStickyId, column);
-      return;
-    }
-    
-    // Otherwise reorder it, passing whether to insert before or after the target
-    kanbanStore.reorderSticky(draggedStickyId, targetStickyId, isTopHalf);
-  }
-  
-  // Add a method to insert at the beginning of a column
-  function handleEmptyColumnDrop(event: DragEvent) {
-    event.preventDefault();
-    isDragOver = false;
-    
-    const draggedStickyId = event.dataTransfer?.getData('text/plain');
-    if (!draggedStickyId) return;
-    
-    // Move the sticky to this column
-    kanbanStore.moveSticky(draggedStickyId, column);
+    // Forward the event to the parent
+    dispatch('finalize', e.detail);
   }
   
   function handleKeyDown(event: KeyboardEvent) {
@@ -135,14 +75,7 @@
   }
 </script>
 
-<div 
-  class="column"
-  class:drag-over={isDragOver}
-  on:dragover={handleDragOver}
-  on:dragleave={handleDragLeave}
-  on:drop={handleDrop}
-  bind:this={columnEl}
->
+<div class="column">
   <div class="column-header">
     <h2>{column}</h2>
     <button 
@@ -178,48 +111,37 @@
     </div>
   {/if}
   
-  <div 
-    class="stickies"
-    on:dragover={handleDragOver}
-    on:dragleave={handleDragLeave}
-    on:drop={handleEmptyColumnDrop}
-    bind:this={stickiesContainerEl}
-  >
-    <!-- Drop zone for the beginning of the column -->
-    {#if stickies.length > 0}
-      <div class="drop-zone drop-zone-top" on:dragover|preventDefault on:drop={handleEmptyColumnDrop}></div>
-    {/if}
-    
-    {#each stickies as sticky (sticky.id)}
-      <div
-        class="sticky-wrapper"
-        on:dragover={(e) => handleStickyDragOver(e, sticky.id)}
-        on:dragleave={handleStickyDragLeave}
-        on:drop={(e) => handleStickyDrop(e, sticky.id)}
-      >
-        <Sticky 
-          {sticky} 
-          isEditing={editingStickyId === sticky.id}
-          on:delete={handleDeleteSticky}
-          on:editDone={() => editingStickyId = null}
-        />
-      </div>
-    {/each}
-    
-    <!-- Drop zone for the end of the column -->
-    {#if stickies.length > 0}
-      <div class="drop-zone drop-zone-bottom" on:dragover|preventDefault on:drop={handleEmptyColumnDrop}></div>
-    {/if}
-    
-    {#if stickies.length === 0}
-      <div 
-        class="empty-column-placeholder"
-        on:dragover|preventDefault
-        on:drop={handleEmptyColumnDrop}
-      >
-        <p>Drag items here or add a new sticky</p>
-      </div>
-    {/if}
+  <div class="stickies">
+    <!-- Add a dropzone using dndzone action for stickies -->
+    <section 
+      class="stickies-container"
+      class:empty={stickies.length === 0}
+      use:dndzone={{items: stickies, flipDurationMs, type: "sticky"}}
+      on:consider={handleDndConsider}
+      on:finalize={handleDndFinalize}
+    >
+      {#each stickies as sticky (sticky.id + (sticky[SHADOW_ITEM_MARKER_PROPERTY_NAME] ? '_' + sticky[SHADOW_ITEM_MARKER_PROPERTY_NAME] : ''))}
+        <div 
+          class="sticky-wrapper"
+          animate:flip={{duration: flipDurationMs}}
+          data-is-dnd-shadow-item-hint={sticky[SHADOW_ITEM_MARKER_PROPERTY_NAME]}
+        >
+          <Sticky 
+            {sticky} 
+            isEditing={editingStickyId === sticky.id}
+            on:delete={handleDeleteSticky}
+            on:editDone={() => editingStickyId = null}
+          />
+        </div>
+      {/each}
+      
+      <!-- Empty column placeholder inside the dropzone -->
+      {#if stickies.length === 0}
+        <div class="empty-column-placeholder">
+          <p>Drop stickies here or add a new one</p>
+        </div>
+      {/if}
+    </section>
   </div>
 </div>
 
@@ -250,147 +172,110 @@
     flex-shrink: 0; /* Prevent header from shrinking */
   }
   
-  .column-header h2 {
+  h2 {
     margin: 0;
     font-size: 18px;
-    font-weight: 600;
-    font-family: 'Comic Sans MS', cursive, sans-serif;
     color: #333;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    font-weight: 600;
   }
   
   .add-sticky-btn {
-    background: #e0e0e0;
-    border: none;
-    width: 32px;
-    height: 32px;
-    min-width: 32px; /* Prevent shrinking */
-    border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 20px;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background-color: #6c6c6c;
+    color: white;
+    border: none;
+    font-size: 18px;
     cursor: pointer;
-    color: #555;
     transition: all 0.2s;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    margin-left: 8px;
   }
   
   .add-sticky-btn:hover {
-    background-color: #d0d0d0;
-    transform: scale(1.1);
+    background-color: #555;
+    transform: scale(1.05);
   }
   
   .stickies {
     flex: 1;
-    overflow-y: auto; /* Allow vertical scrolling within columns */
+    overflow-y: auto;
     overflow-x: hidden;
-    padding: 5px;
+    margin: 0 -5px; /* Give space for the shadows of stickies */
+    padding: 0 5px; /* Compensate for the negative margin */
+    display: flex;
+    flex-direction: column;
+    min-height: 0; /* Needed for proper scrolling within flex container */
+  }
+  
+  .stickies-container {
     display: flex;
     flex-direction: column;
     gap: 12px;
-    /* Better scrolling on touch devices */
-    -webkit-overflow-scrolling: touch;
+    padding: 5px 0;
+    min-height: 50px; /* Ensure there's always space for drop */
+    flex: 1; /* Take up all available space */
   }
   
-  .drop-zone {
-    height: 15px;
-    flex-shrink: 0;
+  /* When empty, make the container fill the height for easier dropping */
+  .stickies-container.empty {
+    min-height: 100%;
     border: 2px dashed transparent;
-    border-radius: 4px;
-    transition: all 0.2s ease;
-    position: relative;
-  }
-  
-  .drop-zone:after {
-    content: '';
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
-    width: 70%;
-    height: 2px;
-    background-color: transparent;
+    border-radius: 5px;
     transition: all 0.2s ease;
   }
   
-  .drop-zone:hover,
-  .drop-zone-top:hover {
-    border-color: #4caf50;
-    background-color: rgba(76, 175, 80, 0.1);
-  }
-  
-  .drop-zone:hover:after {
-    background-color: rgba(76, 175, 80, 0.5);
-  }
-  
-  .drop-zone-top {
-    margin-bottom: 5px;
-  }
-  
-  .drop-zone-bottom {
-    margin-top: 5px;
+  /* Highlight when dragging over the empty container */
+  .stickies-container.empty:hover,
+  .stickies-container.empty:focus-within {
+    border-color: #ccc;
+    background-color: rgba(0, 0, 0, 0.02);
   }
   
   .sticky-wrapper {
-    position: relative;
-    padding: 3px 0;
-    border: 2px solid transparent;
-    border-radius: 3px;
-    transition: all 0.15s ease;
-  }
-
-  .sticky-wrapper.drag-over-top {
-    border-top: 3px dashed #4caf50;
-    padding-top: 0;
-    margin-top: 4px;
-    z-index: 1;
-  }
-
-  .sticky-wrapper.drag-over-bottom {
-    border-bottom: 3px dashed #4caf50;
-    padding-bottom: 0;
-    margin-bottom: 4px;
-    z-index: 1;
+    width: 100%;
   }
   
-  /* Highlight the column when dragging over */
-  .column.drag-over {
-    background-color: rgba(76, 175, 80, 0.1);
-    box-shadow: 0 0 10px rgba(76, 175, 80, 0.4);
-  }
-  
-  /* Add sticky form styling */
   .add-sticky-form {
+    margin-bottom: 16px;
     background-color: white;
-    border-radius: 5px;
-    padding: 12px;
-    margin-bottom: 12px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    flex-shrink: 0;
+    padding: 10px;
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    flex-shrink: 0; /* Prevent form from shrinking */
   }
   
   textarea {
     width: 100%;
     min-height: 80px;
     padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    resize: vertical;
-    font-family: 'Comic Sans MS', cursive, sans-serif;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin-bottom: 10px;
+    font-family: inherit;
     font-size: 14px;
+    resize: vertical;
+  }
+  
+  textarea:focus {
+    outline: none;
+    border-color: #aaa;
   }
   
   .color-input {
     display: flex;
     align-items: center;
-    gap: 8px;
+    margin-bottom: 10px;
+  }
+  
+  input[type="color"] {
+    margin-right: 8px;
+    height: 25px;
+    width: 25px;
+    border: none;
+    cursor: pointer;
   }
   
   .form-actions {
@@ -400,33 +285,42 @@
   }
   
   .add-btn, .cancel-btn {
-    padding: 8px 12px;
+    padding: 6px 12px;
+    background-color: #333;
+    color: white;
     border: none;
-    border-radius: 5px;
+    border-radius: 4px;
     cursor: pointer;
     font-size: 14px;
+    transition: all 0.2s;
   }
   
-  .add-btn {
-    background-color: #4caf50;
-    color: white;
+  .add-btn:hover {
+    background-color: #555;
   }
   
   .cancel-btn {
-    background-color: #f44336;
-    color: white;
+    background-color: #999;
+  }
+  
+  .cancel-btn:hover {
+    background-color: #777;
   }
   
   .empty-column-placeholder {
     display: flex;
-    justify-content: center;
+    flex-direction: column;
     align-items: center;
-    height: 100px;
+    justify-content: center;
     border: 2px dashed #ccc;
     border-radius: 5px;
+    padding: 20px;
+    margin: 10px 0;
     color: #999;
     text-align: center;
-    padding: 10px;
+    min-height: 100px;
+    flex: 1; /* Make placeholder take up available space */
+    cursor: default;
   }
   
   .empty-column-placeholder p {
@@ -434,39 +328,48 @@
     font-size: 14px;
   }
   
-  /* Mobile adjustments */
-  @media (max-width: 768px) {
-    .column {
-      flex: 0 0 270px; /* Fixed width for horizontal scrolling on mobile */
-      padding: 10px;
-    }
+  /* Scrollbar styling */
+  .stickies::-webkit-scrollbar {
+    width: 6px;
   }
   
-  @media (max-width: 480px) {
+  .stickies::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+  }
+  
+  .stickies::-webkit-scrollbar-thumb {
+    background: #ddd;
+    border-radius: 3px;
+  }
+  
+  .stickies::-webkit-scrollbar-thumb:hover {
+    background: #ccc;
+  }
+  
+  @media (max-width: 768px) {
     .column {
-      flex: 0 0 85vw; /* One column takes most of the viewport on mobile */
-      padding: 8px;
+      padding: 10px;
+      min-width: 250px;
     }
     
-    .column-header h2 {
+    .column-header {
+      padding-bottom: 8px;
+      margin-bottom: 8px;
+    }
+    
+    h2 {
       font-size: 16px;
     }
     
     .add-sticky-btn {
-      width: 28px;
-      height: 28px;
-      min-width: 28px;
-      font-size: 18px;
+      width: 24px;
+      height: 24px;
+      font-size: 16px;
     }
-  }
-  
-  /* When column is in drag-over state, make drop zones more visible */
-  .column.drag-over .drop-zone {
-    border-color: rgba(76, 175, 80, 0.5);
-    height: 20px;
-  }
-  
-  .column.drag-over .drop-zone:after {
-    background-color: rgba(76, 175, 80, 0.5);
+    
+    .stickies {
+      gap: 10px;
+    }
   }
 </style> 

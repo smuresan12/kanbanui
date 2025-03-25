@@ -8,6 +8,8 @@ export interface Sticky {
   color: string;
   column: Column;
   createdAt: string; // ISO date string
+  // Add index signature for dnd-action shadow item marker
+  [key: string]: string | boolean | Column;
 }
 
 export interface KanbanState {

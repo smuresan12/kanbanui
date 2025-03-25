@@ -157,6 +157,23 @@ const createKanbanStore = () => {
       });
     },
     
+    // Reorder column with the list of stickies from the UI
+    reorderColumn: (column: Column, columnStickies: Sticky[]) => {
+      update(state => {
+        // Get all stickies that are NOT in this column
+        const otherColumnStickies = state.stickies.filter(s => s.column !== column);
+        
+        // Combine the other column stickies with the reordered stickies for this column
+        const newStickies = [...otherColumnStickies, ...columnStickies];
+        
+        const newState = { ...state, stickies: newStickies };
+        
+        // Save to localStorage
+        localStorage.setItem('kanban-state', JSON.stringify(newState));
+        return newState;
+      });
+    },
+    
     // Check for old stickies in the Done column (older than 100 days)
     getOldDoneStickies: () => {
       const state = loadState();
