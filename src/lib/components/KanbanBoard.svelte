@@ -19,8 +19,12 @@
   });
   
   function handleColumnDndConsider(e: CustomEvent, column: string) {
-    const { items } = e.detail;
-    stickiesByColumn[column] = items;
+    // Simply update the stickies for the column with the items from the event
+    // This ensures proper drag visualization
+    stickiesByColumn = {
+      ...stickiesByColumn,
+      [column]: e.detail.items
+    };
   }
   
   function handleColumnDndFinalize(e: CustomEvent, column: string) {

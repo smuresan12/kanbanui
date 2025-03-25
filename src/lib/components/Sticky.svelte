@@ -2,9 +2,16 @@
   import { createEventDispatcher } from 'svelte';
   import type { Sticky } from '../types';
   import { kanbanStore } from '../stores/kanbanStore';
+  import { SHADOW_ITEM_MARKER_PROPERTY_NAME } from 'svelte-dnd-action';
   
   export let sticky: Sticky;
   export let isEditing = false;
+  
+  // Check if this is a shadow item (being dragged)
+  // This checks both for the SHADOW_ITEM_MARKER_PROPERTY_NAME property
+  // and ensures we're not treating it as undefined
+  $: isDragged = sticky && SHADOW_ITEM_MARKER_PROPERTY_NAME in sticky && 
+                 Boolean(sticky[SHADOW_ITEM_MARKER_PROPERTY_NAME]);
   
   let editableText = sticky.text;
   let editableColor = sticky.color;
@@ -56,6 +63,7 @@
 
 <div 
   class="sticky"
+  class:is-dragged={isDragged}
   style="background-color: {sticky.color};"
 >
   {#if isEditing}
@@ -119,7 +127,8 @@
     padding: 15px;
     border-radius: 2px;
     box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.15);
-    transition: all 0.2s ease;
+    /* Disable transition during drag operations */
+    transition: box-shadow 0.2s ease;
     cursor: grab;
     word-break: break-word;
     box-sizing: border-box;
@@ -130,6 +139,40 @@
     display: flex;
     flex-direction: column;
     flex-shrink: 0;
+  }
+  
+  /* Special styling for when the sticky is being dragged */
+  .sticky.is-dragged {
+    /* Remove transitions and transformations during drag */
+    transition: none !important;
+    transform: none !important;
+    box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.2) !important;
+    z-index: 10 !important;
+  }
+  
+  /* Disable all transitions within a dragged sticky */
+  .sticky.is-dragged * {
+    transition: none !important;
+    animation: none !important;
+  }
+  
+  /* Make sure control buttons stay visible when dragged */
+  .sticky.is-dragged .sticky-controls {
+    opacity: 1 !important;
+  }
+
+  /* Prevent hover effects during drag */
+  .sticky.is-dragged:hover,
+  .sticky.is-dragged .edit-btn:hover,
+  .sticky.is-dragged .delete-btn:hover {
+    transform: none !important;
+  }
+  
+  /* Separate transforms from transitions */
+  .sticky:not(.is-dragged):hover {
+    transform: scale(1.02) rotate(0deg);
+    box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.2);
+    z-index: 1;
   }
   
   .sticky::after {
@@ -155,12 +198,6 @@
   
   .sticky:nth-child(5n) {
     transform: rotate(2deg);
-  }
-  
-  .sticky:hover {
-    transform: scale(1.02) rotate(0deg);
-    box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.2);
-    z-index: 1;
   }
   
   .sticky-content {

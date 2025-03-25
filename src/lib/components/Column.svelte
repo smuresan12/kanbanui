@@ -33,34 +33,17 @@
     items: StickyType[];
     info: {
       id: string;
+      [key: string]: any;
     };
   }
   
   function handleDndConsider(e: CustomEvent<DndEventDetail>) {
-    // Update list when user is dragging
-    const { items } = e.detail;
-    // Only update if the items are for this column
-    if (items.some((item: StickyType) => item.column === column)) {
-      stickies = items.filter((item: StickyType) => item.column === column);
-    }
-    // Forward the event to the parent
+    stickies = e.detail.items;
     dispatch('consider', e.detail);
   }
   
   function handleDndFinalize(e: CustomEvent<DndEventDetail>) {
-    // Finalize the reordering after drag is complete
-    const { items } = e.detail;
-    
-    // Only update the store if we're reordering within the same column
-    if (items.some((item: StickyType) => item.column === column)) {
-      // Filter items to only include the ones for this column
-      const columnItems = items.filter((item: StickyType) => item.column === column);
-      
-      // Update the store with the reordered items
-      kanbanStore.reorderColumn(column, columnItems);
-    }
-    
-    // Forward the event to the parent
+    stickies = e.detail.items;
     dispatch('finalize', e.detail);
   }
   
@@ -120,10 +103,11 @@
       on:consider={handleDndConsider}
       on:finalize={handleDndFinalize}
     >
-      {#each stickies as sticky (sticky.id + (sticky[SHADOW_ITEM_MARKER_PROPERTY_NAME] ? '_' + sticky[SHADOW_ITEM_MARKER_PROPERTY_NAME] : ''))}
+      {#each stickies as sticky (sticky.id + (sticky[SHADOW_ITEM_MARKER_PROPERTY_NAME] ? '_shadow' : ''))}
         <div 
           class="sticky-wrapper"
-          animate:flip={{duration: flipDurationMs}}
+          class:has-shadow-item={sticky[SHADOW_ITEM_MARKER_PROPERTY_NAME]}
+          animate:flip={!sticky[SHADOW_ITEM_MARKER_PROPERTY_NAME] ? {duration: flipDurationMs} : undefined}
           data-is-dnd-shadow-item-hint={sticky[SHADOW_ITEM_MARKER_PROPERTY_NAME]}
         >
           <Sticky 
@@ -234,6 +218,11 @@
   
   .sticky-wrapper {
     width: 100%;
+  }
+  
+  /* Ensure no transitions interfere with dragged items */
+  .sticky-wrapper.has-shadow-item {
+    transition: none !important;
   }
   
   .add-sticky-form {
