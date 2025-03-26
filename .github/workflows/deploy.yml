@@ -42,18 +42,24 @@ jobs:
         uses: actions/configure-pages@v4
       
       - name: Upload artifact
-        id: deployment
+        id: upload-pages
         uses: actions/upload-pages-artifact@v3
         with:
           path: 'build'
+          name: 'github-pages-artifact' # Specify artifact name
 
   deploy:
     needs: build
     runs-on: ubuntu-latest
     environment:
       name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+      url: ${{ steps.upload-pages.outputs.page_url }}
     steps:
+      - name: Download artifact
+        uses: actions/download-pages-artifact@v3
+        with:
+          name: 'github-pages-artifact' # Match the artifact name
+
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v3
