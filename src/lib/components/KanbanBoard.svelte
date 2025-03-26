@@ -84,10 +84,6 @@
 </script>
 
 <main>
-  <div class="board-header">
-    <h1>Kanban Board</h1>
-  </div>
-  
   <div class="board">
     {#each COLUMNS as column}
       <Column 
@@ -118,34 +114,21 @@
     box-sizing: border-box;
   }
   
-  .board-header {
-    padding: 15px;
-    text-align: center;
-    flex-shrink: 0;
-  }
-  
-  h1 {
-    margin: 0;
-    color: #333;
-    font-size: 28px;
-    font-family: 'Comic Sans MS', cursive, sans-serif;
-  }
-  
   .board {
     display: flex;
     flex: 1;
     width: 100%;
     overflow-x: auto;
     overflow-y: hidden;
-    padding: 10px;
-    gap: 15px;
+    padding: 8px;
+    gap: 10px;
     min-height: 0; /* Important for preventing overflow */
     justify-content: stretch; /* Make columns stretch to fill width */
   }
   
   /* Scrollbar styling */
   .board::-webkit-scrollbar {
-    height: 8px;
+    height: 6px;
   }
   
   .board::-webkit-scrollbar-track {
@@ -171,28 +154,16 @@
   
   @media (max-width: 768px) {
     .board {
-      padding: 8px;
-      gap: 8px;
+      padding: 5px;
+      gap: 6px;
       flex-wrap: nowrap;
-    }
-    
-    h1 {
-      font-size: 22px;
     }
   }
   
-  @media (max-width: 480px) {
-    /* For very small screens, make header more compact */
-    .board-header {
-      padding: 8px;
-    }
-    
-    h1 {
-      font-size: 20px;
-    }
-    
+  @media (max-width: 480px) {    
     .board {
-      gap: 12px;
+      gap: 4px;
+      padding: 3px;
     }
   }
 </style> 

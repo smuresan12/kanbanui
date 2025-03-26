@@ -136,7 +136,7 @@
     background-color: #f5f5f5;
     border-radius: 5px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    padding: 12px;
+    padding: 8px;
     box-sizing: border-box;
     position: relative;
     flex: 1 1 0; /* Equal flex-grow, equal flex-shrink, zero flex-basis */
@@ -150,9 +150,9 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding-bottom: 10px;
+    padding-bottom: 8px;
     border-bottom: 1px solid #e0e0e0;
-    margin-bottom: 12px;
+    margin-bottom: 8px;
     flex-shrink: 0; /* Prevent header from shrinking */
   }
   
@@ -167,13 +167,13 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 28px;
-    height: 28px;
+    width: 26px;
+    height: 26px;
     border-radius: 50%;
     background-color: #6c6c6c;
     color: white;
     border: none;
-    font-size: 18px;
+    font-size: 16px;
     cursor: pointer;
     transition: all 0.2s;
   }
@@ -187,8 +187,8 @@
     flex: 1;
     overflow-y: auto;
     overflow-x: hidden;
-    margin: 0 -5px; /* Give space for the shadows of stickies */
-    padding: 0 5px; /* Compensate for the negative margin */
+    margin: 0 -3px; /* Give space for the shadows of stickies */
+    padding: 0 3px; /* Compensate for the negative margin */
     display: flex;
     flex-direction: column;
     min-height: 0; /* Needed for proper scrolling within flex container */
@@ -197,8 +197,8 @@
   .stickies-container {
     display: flex;
     flex-direction: column;
-    gap: 12px;
-    padding: 5px 0;
+    gap: 8px;
+    padding: 3px 0;
     min-height: 50px; /* Ensure there's always space for drop */
     flex: 1; /* Take up all available space */
   }
@@ -226,9 +226,9 @@
   }
   
   .add-sticky-form {
-    margin-bottom: 16px;
+    margin-bottom: 10px;
     background-color: white;
-    padding: 10px;
+    padding: 8px;
     border-radius: 4px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     flex-shrink: 0; /* Prevent form from shrinking */
@@ -236,11 +236,11 @@
   
   textarea {
     width: 100%;
-    min-height: 80px;
-    padding: 10px;
+    min-height: 70px;
+    padding: 8px;
     border: 1px solid #ddd;
     border-radius: 4px;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
     font-family: inherit;
     font-size: 14px;
     resize: vertical;
@@ -254,13 +254,13 @@
   .color-input {
     display: flex;
     align-items: center;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
   }
   
   input[type="color"] {
-    margin-right: 8px;
-    height: 25px;
-    width: 25px;
+    margin-right: 6px;
+    height: 22px;
+    width: 22px;
     border: none;
     cursor: pointer;
   }
@@ -268,17 +268,17 @@
   .form-actions {
     display: flex;
     justify-content: flex-end;
-    gap: 8px;
+    gap: 6px;
   }
   
   .add-btn, .cancel-btn {
-    padding: 6px 12px;
+    padding: 5px 10px;
     background-color: #333;
     color: white;
     border: none;
     border-radius: 4px;
     cursor: pointer;
-    font-size: 14px;
+    font-size: 13px;
     transition: all 0.2s;
   }
   
@@ -301,33 +301,33 @@
     justify-content: center;
     border: 2px dashed #ccc;
     border-radius: 5px;
-    padding: 20px;
-    margin: 10px 0;
+    padding: 15px;
+    margin: 8px 0;
     color: #999;
     text-align: center;
-    min-height: 100px;
+    min-height: 80px;
     flex: 1; /* Make placeholder take up available space */
     cursor: default;
   }
   
   .empty-column-placeholder p {
     margin: 0;
-    font-size: 14px;
+    font-size: 13px;
   }
   
   /* Scrollbar styling */
   .stickies::-webkit-scrollbar {
-    width: 6px;
+    width: 4px;
   }
   
   .stickies::-webkit-scrollbar-track {
     background: #f1f1f1;
-    border-radius: 3px;
+    border-radius: 2px;
   }
   
   .stickies::-webkit-scrollbar-thumb {
     background: #ddd;
-    border-radius: 3px;
+    border-radius: 2px;
   }
   
   .stickies::-webkit-scrollbar-thumb:hover {
@@ -336,27 +336,52 @@
   
   @media (max-width: 768px) {
     .column {
-      padding: 10px;
-      min-width: 250px;
+      padding: 6px;
+      min-width: 200px;
     }
     
     .column-header {
-      padding-bottom: 8px;
-      margin-bottom: 8px;
+      padding-bottom: 6px;
+      margin-bottom: 6px;
     }
     
     h2 {
-      font-size: 16px;
+      font-size: 14px;
     }
     
     .add-sticky-btn {
-      width: 24px;
-      height: 24px;
-      font-size: 16px;
+      width: 22px;
+      height: 22px;
+      font-size: 14px;
     }
     
-    .stickies {
-      gap: 10px;
+    .stickies-container {
+      gap: 6px;
+    }
+    
+    .empty-column-placeholder {
+      padding: 10px;
+      min-height: 60px;
+    }
+    
+    .empty-column-placeholder p {
+      font-size: 12px;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .column {
+      padding: 4px;
+      min-width: 180px;
+    }
+    
+    .column-header {
+      padding-bottom: 4px;
+      margin-bottom: 4px;
+    }
+    
+    .stickies-container {
+      gap: 4px;
     }
   }
 </style> 

@@ -124,9 +124,9 @@
     position: relative;
     width: 100%;
     margin: 0;
-    padding: 15px;
+    padding: 10px;
     border-radius: 2px;
-    box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.15);
+    box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.15);
     /* Disable transition during drag operations */
     transition: box-shadow 0.2s ease;
     cursor: grab;
@@ -135,7 +135,7 @@
     transform: rotate(var(--rotate, -1deg));
     --rotate: calc(-2deg + (Math.random() * 4deg));
     border-bottom-right-radius: 60px 5px;
-    min-height: 80px;
+    min-height: 70px;
     display: flex;
     flex-direction: column;
     flex-shrink: 0;
@@ -183,7 +183,7 @@
     width: 0;
     height: 0;
     border-style: solid;
-    border-width: 0 0 20px 20px;
+    border-width: 0 0 15px 15px;
     border-color: transparent transparent rgba(0, 0, 0, 0.05) transparent;
     border-bottom-right-radius: 6px;
   }
@@ -201,7 +201,7 @@
   }
   
   .sticky-content {
-    min-height: 50px;
+    min-height: 40px;
     flex: 1;
     display: flex;
     flex-direction: column;
@@ -211,8 +211,8 @@
   .sticky p {
     margin: 0;
     font-family: 'Comic Sans MS', cursive, sans-serif;
-    font-size: 16px;
-    line-height: 1.5;
+    font-size: 14px;
+    line-height: 1.4;
     color: rgba(0, 0, 0, 0.8);
     text-shadow: 0.5px 0.5px 0px rgba(255, 255, 255, 0.5);
   }
@@ -220,7 +220,7 @@
   .sticky-controls {
     display: flex;
     justify-content: flex-end;
-    margin-top: 10px;
+    margin-top: 8px;
     opacity: 0.4;
     transition: opacity 0.2s;
     flex-wrap: nowrap;
@@ -234,14 +234,14 @@
     background: none;
     border: none;
     cursor: pointer;
-    margin-left: 5px;
+    margin-left: 4px;
     padding: 2px;
-    font-size: 16px;
+    font-size: 14px;
     display: flex;
     align-items: center;
     justify-content: center;
-    min-width: 30px;
-    min-height: 30px;
+    min-width: 26px;
+    min-height: 26px;
     border-radius: 50%;
     transition: all 0.2s;
     background-color: rgba(255, 255, 255, 0.3);
@@ -258,13 +258,13 @@
     height: 100%;
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 8px;
   }
   
   .sticky-edit textarea {
     width: 100%;
-    min-height: 80px;
-    padding: 8px;
+    min-height: 60px;
+    padding: 6px;
     border: 1px solid rgba(0, 0, 0, 0.1);
     border-radius: 3px;
     resize: vertical;
@@ -276,18 +276,18 @@
   .color-selector {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 6px;
   }
   
   .color-options {
     display: flex;
     flex-wrap: wrap;
-    gap: 5px;
+    gap: 4px;
   }
   
   .color-option {
-    width: 24px;
-    height: 24px;
+    width: 22px;
+    height: 22px;
     border-radius: 50%;
     border: 2px solid transparent;
     cursor: pointer;
@@ -307,8 +307,8 @@
   .color-input {
     display: flex;
     align-items: center;
-    gap: 5px;
-    margin-top: 5px;
+    gap: 4px;
+    margin-top: 4px;
   }
   
   .color-input input {
@@ -332,7 +332,7 @@
   }
   
   .cancel-btn, .save-btn {
-    padding: 6px 10px;
+    padding: 5px 8px;
     border: none;
     border-radius: 3px;
     font-size: 12px;
@@ -361,28 +361,60 @@
   /* Mobile-specific adjustments */
   @media (max-width: 768px) {
     .sticky {
-      padding: 12px;
-      min-height: 60px;
+      padding: 8px;
+      min-height: 55px;
     }
     
     .sticky p {
-      font-size: 14px;
+      font-size: 13px;
     }
     
     .edit-btn, .delete-btn {
-      min-width: 24px;
-      min-height: 24px;
-      font-size: 14px;
+      min-width: 22px;
+      min-height: 22px;
+      font-size: 13px;
     }
     
     .sticky-edit textarea {
-      min-height: 60px;
-      font-size: 14px;
+      min-height: 50px;
+      font-size: 13px;
     }
     
     .cancel-btn, .save-btn {
-      padding: 5px 8px;
+      padding: 4px 6px;
+      font-size: 11px;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .sticky {
+      padding: 6px;
+      min-height: 50px;
+    }
+    
+    .sticky p {
       font-size: 12px;
+      line-height: 1.3;
+    }
+    
+    .edit-btn, .delete-btn {
+      min-width: 20px;
+      min-height: 20px;
+      font-size: 12px;
+    }
+    
+    .sticky-edit textarea {
+      min-height: 45px;
+      padding: 4px;
+    }
+    
+    .sticky-controls {
+      margin-top: 6px;
+    }
+    
+    .color-option {
+      width: 18px;
+      height: 18px;
     }
   }
 </style> 
