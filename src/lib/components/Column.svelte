@@ -4,7 +4,7 @@
   import { kanbanStore } from '../stores/kanbanStore';
   import { dndzone, SHADOW_ITEM_MARKER_PROPERTY_NAME } from 'svelte-dnd-action';
   import { flip } from 'svelte/animate';
-  import { createEventDispatcher } from 'svelte';
+  import { createEventDispatcher, onMount } from 'svelte';
   
   export let column: ColumnType;
   export let stickies: StickyType[] = [];
@@ -13,9 +13,16 @@
   let newStickyText = '';
   let newStickyColor = '#ffcc00';
   let editingStickyId: string | null = null;
+  let addStickyForm: HTMLDivElement;
+  let usedColors: string[] = [];
   
   const flipDurationMs = 200;
   const dispatch = createEventDispatcher();
+  
+  // Subscribe to the store to get used colors
+  const unsubscribe = kanbanStore.subscribe(state => {
+    usedColors = state.usedColors;
+  });
   
   function handleAddSticky() {
     if (newStickyText.trim()) {
@@ -56,6 +63,30 @@
       newStickyText = '';
     }
   }
+  
+  // Handle click outside
+  function handleClickOutside(event: MouseEvent) {
+    if (isAddingSticky && addStickyForm && !addStickyForm.contains(event.target as Node)) {
+      if (newStickyText.trim()) {
+        handleAddSticky();
+      } else {
+        isAddingSticky = false;
+      }
+    }
+  }
+  
+  onMount(() => {
+    if (typeof window !== 'undefined') {
+      window.addEventListener('mousedown', handleClickOutside);
+      return () => {
+        window.removeEventListener('mousedown', handleClickOutside);
+      };
+    }
+  });
+  
+  // Clean up subscription
+  import { onDestroy } from 'svelte';
+  onDestroy(unsubscribe);
 </script>
 
 <div class="column">
@@ -71,7 +102,7 @@
   </div>
   
   {#if isAddingSticky}
-    <div class="add-sticky-form">
+    <div class="add-sticky-form" bind:this={addStickyForm}>
       <textarea
         bind:value={newStickyText}
         on:keydown={handleKeyDown}
@@ -79,13 +110,27 @@
         autoFocus
       ></textarea>
       
-      <div class="color-input">
-        <input type="color" bind:value={newStickyColor} id="newStickyColor">
-        <label for="newStickyColor">Color</label>
+      <div class="color-selector">
+        <div class="color-options">
+          {#each usedColors as color}
+            <button 
+              class="color-option" 
+              style="background-color: {color}" 
+              class:selected={newStickyColor === color}
+              on:click={() => newStickyColor = color}
+              title={color}
+            ></button>
+          {/each}
+        </div>
+        
+        <div class="color-input">
+          <input type="color" bind:value={newStickyColor} id="newStickyColor">
+          <label for="newStickyColor">Custom</label>
+        </div>
       </div>
       
+      <!-- Remove Add button since we now save on click outside -->
       <div class="form-actions">
-        <button class="add-btn" on:click={handleAddSticky}>Add</button>
         <button class="cancel-btn" on:click={() => {
           isAddingSticky = false;
           newStickyText = '';
@@ -263,18 +308,56 @@
     border-color: #aaa;
   }
   
-  .color-input {
+  .color-selector {
     display: flex;
-    align-items: center;
+    flex-direction: column;
+    gap: 6px;
     margin-bottom: 8px;
   }
   
-  input[type="color"] {
-    margin-right: 6px;
-    height: 22px;
+  .color-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+  
+  .color-option {
     width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    cursor: pointer;
+    transition: all 0.2s;
+    padding: 0;
+  }
+  
+  .color-option:hover {
+    transform: scale(1.1);
+  }
+  
+  .color-option.selected {
+    border-color: rgba(0, 0, 0, 0.3);
+    transform: scale(1.1);
+  }
+  
+  .color-input {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 4px;
+  }
+  
+  .color-input input {
+    width: 20px;
+    height: 20px;
+    padding: 0;
     border: none;
     cursor: pointer;
+  }
+  
+  .color-input label {
+    font-size: 12px;
+    color: rgba(0, 0, 0, 0.7);
   }
   
   .form-actions {
@@ -405,6 +488,11 @@
     .empty-column-placeholder {
       padding: 8px;
       min-height: 50px;
+    }
+    
+    .color-option {
+      width: 18px;
+      height: 18px;
     }
   }
 </style> 
