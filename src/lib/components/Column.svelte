@@ -192,6 +192,7 @@
     display: flex;
     flex-direction: column;
     min-height: 0; /* Needed for proper scrolling within flex container */
+    position: relative; /* Add position context for absolute children */
   }
   
   .stickies-container {
@@ -199,13 +200,18 @@
     flex-direction: column;
     gap: 8px;
     padding: 3px 0;
-    min-height: 50px; /* Ensure there's always space for drop */
+    min-height: 100px; /* Minimum height for empty container */
     flex: 1; /* Take up all available space */
+    position: relative; /* Position context for drop placeholder */
   }
   
   /* When empty, make the container fill the height for easier dropping */
   .stickies-container.empty {
-    min-height: 100%;
+    height: 100%;
+    min-height: calc(100% - 20px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
     border-radius: 5px;
     transition: all 0.2s ease;
   }
@@ -305,9 +311,12 @@
     margin: 8px 0;
     color: #999;
     text-align: center;
+    width: calc(100% - 16px);
+    height: calc(100% - 16px);
     min-height: 80px;
-    flex: 1; /* Make placeholder take up available space */
+    box-sizing: border-box;
     cursor: default;
+    position: relative;
   }
   
   .empty-column-placeholder p {
@@ -357,6 +366,7 @@
     
     .stickies-container {
       gap: 6px;
+      min-height: 80px; /* Smaller minimum height on smaller screens */
     }
     
     .empty-column-placeholder {
@@ -382,6 +392,12 @@
     
     .stickies-container {
       gap: 4px;
+      min-height: 60px; /* Even smaller minimum height on tiny screens */
+    }
+    
+    .empty-column-placeholder {
+      padding: 8px;
+      min-height: 50px;
     }
   }
 </style> 
