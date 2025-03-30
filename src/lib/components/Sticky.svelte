@@ -238,7 +238,7 @@
   
   .sticky p {
     margin: 0;
-    font-family: 'Comic Sans MS', cursive, sans-serif;
+    font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
     font-size: 14px;
     line-height: 1.4;
     color: rgba(0, 0, 0, 0.8);
@@ -296,7 +296,7 @@
     border: 1px solid rgba(0, 0, 0, 0.1);
     border-radius: 3px;
     resize: vertical;
-    font-family: 'Comic Sans MS', cursive, sans-serif;
+    font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
     font-size: 14px;
     background-color: rgba(255, 255, 255, 0.9);
   }

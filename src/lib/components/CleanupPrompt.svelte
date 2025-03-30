@@ -76,7 +76,7 @@
     max-height: 80vh;
     overflow-y: auto;
     box-shadow: 0 5px 25px rgba(0, 0, 0, 0.3);
-    font-family: 'Comic Sans MS', cursive, sans-serif;
+    font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   }
   
   h2 {
@@ -115,7 +115,7 @@
     border-radius: 5px;
     display: flex;
     flex-direction: column;
-    font-family: 'Comic Sans MS', cursive, sans-serif;
+    font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
     box-shadow: 1px 2px 5px rgba(0, 0, 0, 0.1);
     transform: rotate(-1deg);
     border-bottom-right-radius: 20px 5px;
@@ -144,7 +144,7 @@
     border-radius: 25px;
     cursor: pointer;
     font-weight: 600;
-    font-family: 'Comic Sans MS', cursive, sans-serif;
+    font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
     font-size: 16px;
     transition: all 0.2s;
   }
