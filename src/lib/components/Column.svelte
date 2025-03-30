@@ -65,8 +65,12 @@
   }
   
   // Handle click outside
-  function handleClickOutside(event: MouseEvent) {
-    if (isAddingSticky && addStickyForm && !addStickyForm.contains(event.target as Node)) {
+  function handleClickOutside(event: Event) {
+    // Check if user clicked outside the form
+    if (isAddingSticky && addStickyForm && 
+        !addStickyForm.contains(event.target as Node) && 
+        !(event.target as HTMLElement).classList.contains('add-sticky-btn')) {
+      
       if (newStickyText.trim()) {
         handleAddSticky();
       } else {
@@ -75,11 +79,24 @@
     }
   }
   
+  function handleCancelBtn() {
+    isAddingSticky = false;
+    newStickyText = '';
+    // Force a focus on the document body to ensure form loses focus
+    if (typeof document !== 'undefined') {
+      document.body.focus();
+    }
+  }
+  
+  function handleAddBtn() {
+    isAddingSticky = true;
+  }
+  
   onMount(() => {
     if (typeof window !== 'undefined') {
-      window.addEventListener('mousedown', handleClickOutside);
+      window.addEventListener('click', handleClickOutside);
       return () => {
-        window.removeEventListener('mousedown', handleClickOutside);
+        window.removeEventListener('click', handleClickOutside);
       };
     }
   });
@@ -92,17 +109,23 @@
 <div class="column">
   <div class="column-header">
     <h2>{column}</h2>
-    <button 
-      class="add-sticky-btn" 
-      on:click={() => isAddingSticky = !isAddingSticky}
-      title="Add new sticky"
-    >
-      {#if isAddingSticky}✖{:else}+{/if}
-    </button>
+    {#if isAddingSticky}
+      <button 
+        class="add-sticky-btn" 
+        on:click|stopPropagation|preventDefault={handleCancelBtn}
+        title="Cancel"
+      >✖</button>
+    {:else}
+      <button 
+        class="add-sticky-btn" 
+        on:click|stopPropagation|preventDefault={handleAddBtn}
+        title="Add new sticky"
+      >+</button>
+    {/if}
   </div>
   
   {#if isAddingSticky}
-    <div class="add-sticky-form" bind:this={addStickyForm}>
+    <div class="add-sticky-form" bind:this={addStickyForm} on:click|stopPropagation>
       <textarea
         bind:value={newStickyText}
         on:keydown={handleKeyDown}
@@ -129,12 +152,8 @@
         </div>
       </div>
       
-      <!-- Remove Add button since we now save on click outside -->
       <div class="form-actions">
-        <button class="cancel-btn" on:click={() => {
-          isAddingSticky = false;
-          newStickyText = '';
-        }}>Cancel</button>
+        <button class="cancel-btn" on:click|stopPropagation|preventDefault={handleCancelBtn}>Cancel</button>
       </div>
     </div>
   {/if}
