@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { createEventDispatcher } from 'svelte';
+  import { createEventDispatcher, onMount } from 'svelte';
   import type { Sticky } from '../types';
   import { kanbanStore } from '../stores/kanbanStore';
   import { SHADOW_ITEM_MARKER_PROPERTY_NAME } from 'svelte-dnd-action';
@@ -16,6 +16,7 @@
   let editableText = sticky.text;
   let editableColor = sticky.color;
   let usedColors: string[] = [];
+  let editForm: HTMLDivElement;
   
   const dispatch = createEventDispatcher<{
     delete: { id: string };
@@ -36,12 +37,25 @@
   }
   
   function handleSave() {
-    kanbanStore.updateSticky(sticky.id, {
-      text: editableText,
-      color: editableColor
-    });
+    if (editableText.trim()) {
+      kanbanStore.updateSticky(sticky.id, {
+        text: editableText,
+        color: editableColor
+      });
+    }
     isEditing = false;
     dispatch('editDone', { id: sticky.id });
+  }
+  
+  function handleCancel() {
+    isEditing = false;
+    editableText = sticky.text;
+    editableColor = sticky.color;
+    dispatch('editDone', { id: sticky.id });
+    // Force a focus on the document body to ensure form loses focus
+    if (typeof document !== 'undefined') {
+      document.body.focus();
+    }
   }
   
   function handleKeyDown(event: KeyboardEvent) {
@@ -49,12 +63,32 @@
       event.preventDefault();
       handleSave();
     } else if (event.key === 'Escape') {
-      isEditing = false;
-      editableText = sticky.text;
-      editableColor = sticky.color;
-      dispatch('editDone', { id: sticky.id });
+      handleCancel();
     }
   }
+  
+  // Handle click outside
+  function handleClickOutside(event: Event) {
+    if (isEditing && editForm && 
+        !editForm.contains(event.target as Node) && 
+        !(event.target as HTMLElement).classList.contains('edit-btn')) {
+      
+      if (editableText.trim()) {
+        handleSave();
+      } else {
+        handleCancel();
+      }
+    }
+  }
+  
+  onMount(() => {
+    if (typeof window !== 'undefined') {
+      window.addEventListener('click', handleClickOutside);
+      return () => {
+        window.removeEventListener('click', handleClickOutside);
+      };
+    }
+  });
   
   // Clean up subscription
   import { onDestroy } from 'svelte';
@@ -67,7 +101,7 @@
   style="background-color: {sticky.color};"
 >
   {#if isEditing}
-    <div class="sticky-edit">
+    <div class="sticky-edit" bind:this={editForm} on:click|stopPropagation>
       <textarea 
         bind:value={editableText}
         on:keydown={handleKeyDown}
@@ -99,21 +133,15 @@
       </div>
       
       <div class="sticky-actions">
-        <button class="cancel-btn" on:click={() => {
-          isEditing = false;
-          editableText = sticky.text;
-          editableColor = sticky.color;
-          dispatch('editDone', { id: sticky.id });
-        }}>Cancel</button>
-        <button class="save-btn" on:click={handleSave}>Save</button>
+        <button class="cancel-btn" on:click|stopPropagation|preventDefault={handleCancel}>Cancel</button>
       </div>
     </div>
   {:else}
     <div class="sticky-content">
       <p>{sticky.text}</p>
       <div class="sticky-controls">
-        <button class="edit-btn" on:click={handleEdit} title="Edit">✏️</button>
-        <button class="delete-btn" on:click={handleDelete} title="Delete">🗑️</button>
+        <button class="edit-btn" on:click|stopPropagation|preventDefault={handleEdit} title="Edit">✏️</button>
+        <button class="delete-btn" on:click|stopPropagation|preventDefault={handleDelete} title="Delete">🗑️</button>
       </div>
     </div>
   {/if}
