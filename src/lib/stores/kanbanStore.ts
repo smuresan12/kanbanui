@@ -7,31 +7,126 @@ const defaultState: KanbanState = {
   usedColors: ['#ffcc00', '#ff9900', '#ff6666', '#99cc66', '#66cccc', '#6699cc']
 };
 
-// Create a function to load data from localStorage
-const loadState = (): KanbanState => {
-  if (typeof localStorage === 'undefined') {
-    return defaultState;
-  }
-  
-  const saved = localStorage.getItem('kanban-state');
-  if (saved) {
-    try {
-      return JSON.parse(saved);
-    } catch (e) {
-      console.error('Failed to parse saved state', e);
+// IndexedDB configuration
+const DB_NAME = 'kanban-db';
+const DB_VERSION = 1;
+const STORE_NAME = 'kanban-state';
+const KEY = 'state';
+
+// Open IndexedDB connection
+const openDB = (): Promise<IDBDatabase> => {
+  return new Promise((resolve, reject) => {
+    if (!indexedDB) {
+      reject(new Error('IndexedDB is not supported in this browser'));
+      return;
+    }
+
+    const request = indexedDB.open(DB_NAME, DB_VERSION);
+
+    request.onerror = () => {
+      reject(request.error);
+    };
+
+    request.onsuccess = () => {
+      resolve(request.result);
+    };
+
+    request.onupgradeneeded = () => {
+      const db = request.result;
+      if (!db.objectStoreNames.contains(STORE_NAME)) {
+        db.createObjectStore(STORE_NAME);
+      }
+    };
+  });
+};
+
+// Save state to IndexedDB
+const saveState = async (state: KanbanState): Promise<void> => {
+  try {
+    const db = await openDB();
+    const transaction = db.transaction(STORE_NAME, 'readwrite');
+    const store = transaction.objectStore(STORE_NAME);
+    
+    return new Promise((resolve, reject) => {
+      const request = store.put(state, KEY);
+      
+      request.onerror = () => {
+        reject(request.error);
+      };
+      
+      request.onsuccess = () => {
+        resolve();
+      };
+      
+      transaction.oncomplete = () => {
+        db.close();
+      };
+    });
+  } catch (error) {
+    console.error('Failed to save to IndexedDB', error);
+    // Fallback to localStorage if IndexedDB fails
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem('kanban-state', JSON.stringify(state));
     }
   }
-  return defaultState;
+};
+
+// Load state from IndexedDB
+const loadState = async (): Promise<KanbanState> => {
+  try {
+    const db = await openDB();
+    const transaction = db.transaction(STORE_NAME, 'readonly');
+    const store = transaction.objectStore(STORE_NAME);
+    
+    return new Promise((resolve, reject) => {
+      const request = store.get(KEY);
+      
+      request.onerror = () => {
+        reject(request.error);
+      };
+      
+      request.onsuccess = () => {
+        if (request.result) {
+          resolve(request.result);
+        } else {
+          // No data found in IndexedDB
+          resolve(defaultState);
+        }
+      };
+      
+      transaction.oncomplete = () => {
+        db.close();
+      };
+    });
+  } catch (error) {
+    console.error('Failed to load from IndexedDB', error);
+    // Fallback to localStorage if IndexedDB fails
+    if (typeof localStorage !== 'undefined') {
+      const saved = localStorage.getItem('kanban-state');
+      if (saved) {
+        try {
+          return JSON.parse(saved);
+        } catch (e) {
+          console.error('Failed to parse saved state', e);
+        }
+      }
+    }
+    return defaultState;
+  }
 };
 
 // Create the store
 const createKanbanStore = () => {
-  // Initialize with data from localStorage if available
+  // Initialize with defaultState first, then async update when data is loaded
   const { subscribe, set, update } = writable<KanbanState>(defaultState);
   
-  // Load state when browser is available
+  // Load state from IndexedDB when browser is available
   if (typeof window !== 'undefined') {
-    set(loadState());
+    loadState().then(state => {
+      set(state);
+    }).catch(error => {
+      console.error('Error loading initial state', error);
+    });
   }
   
   return {
@@ -58,8 +153,8 @@ const createKanbanStore = () => {
           newState.usedColors = [...state.usedColors, color];
         }
         
-        // Save to localStorage
-        localStorage.setItem('kanban-state', JSON.stringify(newState));
+        // Save to IndexedDB
+        saveState(newState).catch(err => console.error('Error saving new sticky', err));
         return newState;
       });
     },
@@ -67,19 +162,44 @@ const createKanbanStore = () => {
     // Update a sticky
     updateSticky: (id: string, updates: Partial<Omit<Sticky, 'id' | 'createdAt'>>) => {
       update(state => {
-        const updatedStickies = state.stickies.map(sticky => 
-          sticky.id === id ? { ...sticky, ...updates } : sticky
-        );
+        const updatedStickies = state.stickies.map(sticky => {
+          if (sticky.id === id) {
+            // Create a new sticky with the updates applied
+            const updatedSticky: Sticky = { ...sticky };
+            // Apply each update in a type-safe way
+            if (typeof updates.text === 'string') updatedSticky.text = updates.text;
+            if (typeof updates.color === 'string') updatedSticky.color = updates.color;
+            if (updates.column && 
+                (updates.column === 'Backlog' || 
+                 updates.column === 'To Do' || 
+                 updates.column === 'In Progress' || 
+                 updates.column === 'Done')) {
+              updatedSticky.column = updates.column;
+            }
+            
+            // Apply any other properties that match the index signature
+            Object.entries(updates).forEach(([key, value]) => {
+              if (key !== 'text' && key !== 'color' && key !== 'column') {
+                if (typeof value === 'string' || typeof value === 'boolean') {
+                  updatedSticky[key] = value;
+                }
+              }
+            });
+            
+            return updatedSticky;
+          }
+          return sticky;
+        });
         
         const newState = { ...state, stickies: updatedStickies };
         
         // Update usedColors if color has changed
-        if (updates.color && !state.usedColors.includes(updates.color)) {
+        if (updates.color && typeof updates.color === 'string' && !state.usedColors.includes(updates.color)) {
           newState.usedColors = [...state.usedColors, updates.color];
         }
         
-        // Save to localStorage
-        localStorage.setItem('kanban-state', JSON.stringify(newState));
+        // Save to IndexedDB
+        saveState(newState).catch(err => console.error('Error updating sticky', err));
         return newState;
       });
     },
@@ -92,8 +212,8 @@ const createKanbanStore = () => {
           stickies: state.stickies.filter(sticky => sticky.id !== id)
         };
         
-        // Save to localStorage
-        localStorage.setItem('kanban-state', JSON.stringify(newState));
+        // Save to IndexedDB
+        saveState(newState).catch(err => console.error('Error deleting sticky', err));
         return newState;
       });
     },
@@ -107,8 +227,8 @@ const createKanbanStore = () => {
         
         const newState = { ...state, stickies: updatedStickies };
         
-        // Save to localStorage
-        localStorage.setItem('kanban-state', JSON.stringify(newState));
+        // Save to IndexedDB
+        saveState(newState).catch(err => console.error('Error moving sticky', err));
         return newState;
       });
     },
@@ -151,8 +271,8 @@ const createKanbanStore = () => {
         
         const newState = { ...state, stickies: reorderedStickies };
         
-        // Save to localStorage
-        localStorage.setItem('kanban-state', JSON.stringify(newState));
+        // Save to IndexedDB
+        saveState(newState).catch(err => console.error('Error reordering sticky', err));
         return newState;
       });
     },
@@ -168,15 +288,15 @@ const createKanbanStore = () => {
         
         const newState = { ...state, stickies: newStickies };
         
-        // Save to localStorage
-        localStorage.setItem('kanban-state', JSON.stringify(newState));
+        // Save to IndexedDB
+        saveState(newState).catch(err => console.error('Error reordering column', err));
         return newState;
       });
     },
     
     // Check for old stickies in the Done column (older than 100 days)
-    getOldDoneStickies: () => {
-      const state = loadState();
+    getOldDoneStickies: async () => {
+      const state = await loadState();
       const now = new Date();
       const hundredDaysAgo = new Date(now.setDate(now.getDate() - 100));
       
@@ -204,8 +324,8 @@ const createKanbanStore = () => {
         
         const newState = { ...state, stickies: newStickies };
         
-        // Save to localStorage
-        localStorage.setItem('kanban-state', JSON.stringify(newState));
+        // Save to IndexedDB
+        saveState(newState).catch(err => console.error('Error deleting old done stickies', err));
         return newState;
       });
     }
