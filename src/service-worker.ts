@@ -41,6 +41,12 @@ self.addEventListener('activate', (event) => {
 
 // Intercept fetch requests
 self.addEventListener('fetch', (event) => {
+  // Skip caching for non-HTTP/HTTPS requests
+  const url = new URL(event.request.url);
+  if (url.protocol !== 'http:' && url.protocol !== 'https:') {
+    return; // Let the browser handle non-HTTP requests normally
+  }
+
   // Try the network first, falling back to cache if network fails
   async function respondFromNetworkFallingBackToCache() {
     const cache = await caches.open(CACHE);
@@ -54,7 +60,12 @@ self.addEventListener('fetch', (event) => {
       if (response.ok) {
         // For non-GET requests, we don't want to cache the response
         if (event.request.method === 'GET') {
-          cache.put(event.request, response.clone());
+          try {
+            // Wrap cache.put in try/catch to handle any unexpected caching errors
+            cache.put(event.request, response.clone());
+          } catch (error) {
+            console.error('Failed to cache response:', error);
+          }
         }
       }
       
