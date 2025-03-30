@@ -4,10 +4,15 @@
   import { kanbanStore } from '../stores/kanbanStore';
   import Column from './Column.svelte';
   import CleanupPrompt from './CleanupPrompt.svelte';
+  import BackupReminder from './BackupReminder.svelte';
+  import FileDropZone from './FileDropZone.svelte';
   
   let stickiesByColumn: Record<string, Sticky[]> = {};
   let oldDoneStickies: Sticky[] = [];
   let showCleanupPrompt = false;
+  let showBackupReminder = false;
+  let showFileDropZone = false;
+  let lastBackupDate: string | null = null;
   
   // Subscribe to the store
   const unsubscribe = kanbanStore.subscribe(state => {
@@ -16,6 +21,9 @@
       acc[column] = state.stickies.filter(s => s.column === column);
       return acc;
     }, {} as Record<string, Sticky[]>);
+    
+    // Update lastBackupDate
+    lastBackupDate = state.lastBackupDate;
   });
   
   function handleColumnDndConsider(e: CustomEvent, column: string) {
@@ -65,22 +73,81 @@
     }
   }
   
-  // Check for old stickies in the Done column on mount
-  onMount(() => {
+  // Check for backup needs and old stickies in the Done column on mount
+  onMount(async () => {
+    // Check if we need a backup reminder and if there are stickies to back up
+    const needsBackup = await kanbanStore.needsBackupReminder();
+    
+    if (needsBackup) {
+      // Only check if there are stickies using the current store value
+      let hasStickies = false;
+      const unsubscribe = kanbanStore.subscribe(state => {
+        hasStickies = state.stickies.length > 0;
+      });
+      unsubscribe();
+      
+      // Only show backup reminder if there are stickies
+      if (hasStickies) {
+        showBackupReminder = true;
+      }
+    }
+    
     // Check if we have old stickies
-    oldDoneStickies = kanbanStore.getOldDoneStickies();
+    oldDoneStickies = await kanbanStore.getOldDoneStickies();
+    if (oldDoneStickies.length > 0 && !showBackupReminder) {
+      showCleanupPrompt = true;
+    }
+    
+    // Only add event listeners if we're in a browser environment
+    if (typeof window !== 'undefined') {
+      // Add drag and drop event listeners for the entire window
+      window.addEventListener('dragover', handleGlobalDragOver);
+      window.addEventListener('drop', handleGlobalDrop);
+    }
+  });
+  
+  // Handle global drag and drop to show the file drop zone
+  function handleGlobalDragOver(e: DragEvent) {
+    e.preventDefault();
+    
+    // Only show the drop zone if the drag contains files
+    if (e.dataTransfer?.types.includes('Files')) {
+      showFileDropZone = true;
+    }
+  }
+  
+  function handleGlobalDrop(e: DragEvent) {
+    e.preventDefault();
+  }
+  
+  function handleBackupComplete() {
+    showBackupReminder = false;
+    
+    // After the backup reminder is done, check for old stickies
     if (oldDoneStickies.length > 0) {
       showCleanupPrompt = true;
     }
-  });
+  }
   
   function handleCleanupComplete() {
     showCleanupPrompt = false;
   }
   
-  // Clean up subscription
+  function handleFileDropComplete() {
+    showFileDropZone = false;
+  }
+  
+  // Clean up subscription and event listeners
   import { onDestroy } from 'svelte';
-  onDestroy(unsubscribe);
+  onDestroy(() => {
+    unsubscribe();
+    
+    // Only remove event listeners if we're in a browser environment
+    if (typeof window !== 'undefined') {
+      window.removeEventListener('dragover', handleGlobalDragOver);
+      window.removeEventListener('drop', handleGlobalDrop);
+    }
+  });
 </script>
 
 <main>
@@ -94,6 +161,17 @@
       />
     {/each}
   </div>
+  
+  <BackupReminder 
+    show={showBackupReminder}
+    {lastBackupDate}
+    on:complete={handleBackupComplete}
+  />
+  
+  <FileDropZone 
+    show={showFileDropZone} 
+    on:complete={handleFileDropComplete}
+  />
   
   {#if showCleanupPrompt}
     <CleanupPrompt 

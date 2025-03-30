@@ -15,4 +15,6 @@ export interface Sticky {
 export interface KanbanState {
   stickies: Sticky[];
   usedColors: string[]; // Colors already used for easy suggestion
+  lastBackupDate: string | null; // ISO date string when last backup was made
+  disableBackupReminders?: boolean; // Flag to disable backup reminders
 } 

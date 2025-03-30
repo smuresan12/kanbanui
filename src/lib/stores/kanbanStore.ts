@@ -4,7 +4,8 @@ import type { KanbanState, Sticky, Column } from '../types';
 // Initial state
 const defaultState: KanbanState = {
   stickies: [],
-  usedColors: ['#ffcc00', '#ff9900', '#ff6666', '#99cc66', '#66cccc', '#6699cc']
+  usedColors: ['#ffcc00', '#ff9900', '#ff6666', '#99cc66', '#66cccc', '#6699cc'],
+  lastBackupDate: null
 };
 
 // IndexedDB configuration
@@ -123,6 +124,10 @@ const createKanbanStore = () => {
   // Load state from IndexedDB when browser is available
   if (typeof window !== 'undefined') {
     loadState().then(state => {
+      // Ensure lastBackupDate exists
+      if (state.lastBackupDate === undefined) {
+        state.lastBackupDate = null;
+      }
       set(state);
     }).catch(error => {
       console.error('Error loading initial state', error);
@@ -326,6 +331,98 @@ const createKanbanStore = () => {
         
         // Save to IndexedDB
         saveState(newState).catch(err => console.error('Error deleting old done stickies', err));
+        return newState;
+      });
+    },
+    
+    // Export state as a downloadable file
+    exportState: () => {
+      return new Promise<Blob>(resolve => {
+        update(state => {
+          // Update the last backup date
+          const newState = {
+            ...state,
+            lastBackupDate: new Date().toISOString()
+          };
+          
+          // Create a blob of the state data
+          const stateBlob = new Blob(
+            [JSON.stringify(newState, null, 2)], 
+            { type: 'application/json' }
+          );
+          
+          // Save state with updated lastBackupDate
+          saveState(newState).catch(err => console.error('Error saving backup date', err));
+          
+          // Resolve with the blob
+          resolve(stateBlob);
+          
+          return newState;
+        });
+      });
+    },
+    
+    // Import state from a file
+    importState: (fileContent: string) => {
+      try {
+        const importedState = JSON.parse(fileContent) as KanbanState;
+        
+        // Validate the imported data
+        if (!importedState.stickies || !Array.isArray(importedState.stickies)) {
+          throw new Error('Invalid backup file: missing or invalid stickies array');
+        }
+        
+        // Update the state with the imported data
+        update(() => {
+          const newState = {
+            ...importedState,
+            lastBackupDate: new Date().toISOString() // Update backup date when importing
+          };
+          
+          // Save to IndexedDB
+          saveState(newState).catch(err => console.error('Error saving imported state', err));
+          return newState;
+        });
+        
+        return true;
+      } catch (error) {
+        console.error('Error importing state', error);
+        return false;
+      }
+    },
+    
+    // Check if we need a backup reminder (returns true if no backup in the last 7 days)
+    needsBackupReminder: async () => {
+      const state = await loadState();
+      
+      // If user has disabled backup reminders, don't show them
+      if (state.disableBackupReminders) {
+        return false;
+      }
+      
+      // If no backup has ever been made, we need a reminder
+      if (!state.lastBackupDate) {
+        return true;
+      }
+      
+      // Check if the last backup was more than 7 days ago
+      const lastBackup = new Date(state.lastBackupDate);
+      const now = new Date();
+      const sevenDaysAgo = new Date(now.setDate(now.getDate() - 7));
+      
+      return lastBackup < sevenDaysAgo;
+    },
+    
+    // Disable backup reminders permanently
+    disableBackupReminders: () => {
+      update(state => {
+        const newState = {
+          ...state,
+          disableBackupReminders: true
+        };
+        
+        // Save to IndexedDB
+        saveState(newState).catch(err => console.error('Error disabling backup reminders', err));
         return newState;
       });
     }
