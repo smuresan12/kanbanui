@@ -4,7 +4,7 @@ import type { KanbanState, Sticky, Column } from '../types';
 // Initial state
 const defaultState: KanbanState = {
   stickies: [],
-  usedColors: ['#ffcc00', '#ff9900', '#ff6666', '#99cc66', '#66cccc', '#6699cc'],
+  usedColors: ['rgb(76, 144, 225)', 'rgb(80, 174, 199)', 'rgb(137, 210, 164)', 'rgb(237, 112, 106)', 'rgb(244, 180, 80)', 'rgb(236, 95, 161)'],
   lastBackupDate: null
 };
 
