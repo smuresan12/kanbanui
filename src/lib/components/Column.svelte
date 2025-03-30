@@ -95,11 +95,22 @@
   {/if}
   
   <div class="stickies">
+    <!-- Empty column placeholder outside the dropzone -->
+    {#if stickies.length === 0}
+      <div class="empty-column-placeholder">
+        <p>Drop stickies here or add a new one</p>
+      </div>
+    {/if}
+    
     <!-- Add a dropzone using dndzone action for stickies -->
     <section 
       class="stickies-container"
       class:empty={stickies.length === 0}
-      use:dndzone={{items: stickies, flipDurationMs, type: "sticky"}}
+      use:dndzone={{
+        items: stickies, 
+        flipDurationMs, 
+        type: "sticky"
+      }}
       on:consider={handleDndConsider}
       on:finalize={handleDndFinalize}
     >
@@ -118,13 +129,6 @@
           />
         </div>
       {/each}
-      
-      <!-- Empty column placeholder inside the dropzone -->
-      {#if stickies.length === 0}
-        <div class="empty-column-placeholder">
-          <p>Drop stickies here or add a new one</p>
-        </div>
-      {/if}
     </section>
   </div>
 </div>
@@ -203,6 +207,7 @@
     min-height: 100px; /* Minimum height for empty container */
     flex: 1; /* Take up all available space */
     position: relative; /* Position context for drop placeholder */
+    z-index: 1; /* Ensure it's above the placeholder */
   }
   
   /* When empty, make the container fill the height for easier dropping */
@@ -214,6 +219,7 @@
     justify-content: center;
     border-radius: 5px;
     transition: all 0.2s ease;
+    background-color: transparent; /* Make background transparent to see placeholder */
   }
   
   /* Highlight when dragging over the empty container */
@@ -311,12 +317,13 @@
     margin: 8px 0;
     color: #999;
     text-align: center;
-    width: calc(100% - 16px);
-    height: calc(100% - 16px);
-    min-height: 80px;
-    box-sizing: border-box;
-    cursor: default;
-    position: relative;
+    position: absolute;
+    top: 0;
+    left: 3px;
+    right: 3px;
+    bottom: 0;
+    z-index: 0; /* Place it behind the dropzone */
+    pointer-events: none; /* Ensure it doesn't interfere with mouse events */
   }
   
   .empty-column-placeholder p {
