@@ -184,7 +184,7 @@
         on:keydown={handleKeyDown}
         placeholder="Enter sticky text..."
         autoFocus
-        style="color: {editableTextColor}; background-color: {editableColor}80;"
+        style="color: rgba(0, 0, 0, 0.9); background-color: {editableColor}80;"
       ></textarea>
       
       <div class="color-selector">
