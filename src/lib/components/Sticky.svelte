@@ -346,11 +346,12 @@
   
   .sticky-controls {
     display: flex;
-    justify-content: flex-end;
+    justify-content: center;
     margin-top: 8px;
     opacity: 0.4;
     transition: opacity 0.2s;
     flex-wrap: nowrap;
+    gap: clamp(16px, 2vw, 32px);
   }
   
   .sticky:hover .sticky-controls {
@@ -361,7 +362,6 @@
     background: none;
     border: none;
     cursor: pointer;
-    margin-left: 4px;
     padding: 2px;
     font-size: 14px;
     display: flex;
