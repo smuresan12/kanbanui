@@ -106,6 +106,13 @@
   
   function handleEdit() {
     isEditing = true;
+    // Use setTimeout to ensure the textarea is rendered
+    setTimeout(() => {
+      const textarea = editForm?.querySelector('textarea');
+      if (textarea) {
+        textarea.focus();
+      }
+    }, 0);
   }
   
   function handleSave() {
