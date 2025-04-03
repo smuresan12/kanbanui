@@ -272,6 +272,7 @@
     box-sizing: border-box;
     transition: font-size 0.2s ease, color 0.2s ease;
     font-weight: 600;
+    text-align: center;
   }
   
   /* Special styling for when the sticky is being dragged */
@@ -339,6 +340,8 @@
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    align-items: center;
+    text-align: center;
   }
   
   .sticky-controls {
