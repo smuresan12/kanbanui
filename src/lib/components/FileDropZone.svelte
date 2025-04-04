@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { createEventDispatcher } from 'svelte';
+  import { createEventDispatcher, onMount } from 'svelte';
   import { kanbanStore } from '../stores/kanbanStore';
   
   export let show = false;
@@ -7,8 +7,17 @@
   let isDragging = false;
   let errorMessage = '';
   let successMessage = '';
+  let fileInput: HTMLInputElement;
   
   const dispatch = createEventDispatcher();
+
+  onMount(() => {
+    // Check URL parameters on mount
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has('restore')) {
+      show = true;
+    }
+  });
   
   // Track drag events
   function handleDragEnter(e: DragEvent) {
@@ -44,9 +53,26 @@
     
     const file = e.dataTransfer.files[0];
     
+    processFile(file);
+  }
+
+  function handleFileSelect(e: Event) {
+    const target = e.target as HTMLInputElement;
+    errorMessage = '';
+    successMessage = '';
+    
+    if (!target.files || target.files.length === 0) {
+      return;
+    }
+    
+    const file = target.files[0];
+    processFile(file);
+  }
+
+  function processFile(file: File) {
     // Check if it's a JSON file
     if (file.type !== 'application/json' && !file.name.endsWith('.json')) {
-      errorMessage = 'Please drop a JSON backup file';
+      errorMessage = 'Please select a JSON backup file';
       return;
     }
     
@@ -62,8 +88,10 @@
         
         if (success) {
           successMessage = 'Backup restored successfully!';
+          // Show success message for 1.5 seconds before closing
           setTimeout(() => {
-            dispatch('complete');
+            console.log('Closing modal');
+            closeModal();
           }, 1500);
         } else {
           errorMessage = 'Failed to restore backup: Invalid file format';
@@ -81,7 +109,22 @@
   }
   
   function closeModal() {
+    // Clear the restore parameter from URL without refreshing page
+    if (window.history.pushState) {
+      const newUrl = new URL(window.location.href);
+      newUrl.searchParams.delete('restore');
+      window.history.pushState({path: newUrl.toString()}, '', newUrl.toString());
+    }
+
+    show = false;
+
     dispatch('complete');
+  }
+
+  function openFilePicker() {
+    if (fileInput) {
+      fileInput.click();
+    }
   }
 </script>
 
@@ -100,14 +143,22 @@
           on:dragover={handleDragOver}
           on:dragleave={handleDragLeave}
           on:drop={handleDrop}
+          on:click={openFilePicker}
         >
+          <input 
+            type="file" 
+            bind:this={fileInput} 
+            style="display: none;" 
+            accept=".json,application/json" 
+            on:change={handleFileSelect} 
+          />
           <div class="drop-message">
             <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
               <polyline points="17 8 12 3 7 8"></polyline>
               <line x1="12" y1="3" x2="12" y2="15"></line>
             </svg>
-            <p>Drag and drop backup file here</p>
+            <p>Drag and drop or tap to select backup file</p>
             <span>Only .json backup files are supported</span>
           </div>
         </div>
