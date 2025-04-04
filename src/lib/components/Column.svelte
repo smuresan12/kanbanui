@@ -154,7 +154,6 @@
         on:keydown={handleKeyDown}
         placeholder="Enter sticky text..."
         autoFocus
-        style="color: rgba(0, 0, 0, 0.9); background-color: {newStickyColor}80;"
       ></textarea>
       
       <div class="color-selector">
@@ -378,6 +377,8 @@
     font-family: inherit;
     font-size: 14px;
     resize: vertical;
+    background-color: white;
+    color: black;
   }
   
   textarea:focus {
