@@ -344,9 +344,9 @@
     background-color: transparent; /* Make background transparent to see placeholder */
   }
   
-  /* Highlight when dragging over the empty container */
-  .stickies-container.empty:hover,
-  .stickies-container.empty:focus-within {
+  /* Add hover effect for all stickies containers, not just empty ones */
+  .stickies-container:hover,
+  .stickies-container:focus-within {
     background-color: rgba(0, 0, 0, 0.02);
   }
   
