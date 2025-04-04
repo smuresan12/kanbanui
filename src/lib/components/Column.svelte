@@ -160,14 +160,6 @@
   {/if}
   
   <div class="stickies">
-    <!-- Empty column placeholder outside the dropzone -->
-    {#if stickies.length === 0}
-      <div class="empty-column-placeholder">
-        <p>Drop stickies here or create a new one</p>
-      </div>
-    {/if}
-    
-    <!-- Add a dropzone using dndzone action for stickies -->
     <section 
       class="stickies-container"
       class:empty={stickies.length === 0}
@@ -406,31 +398,6 @@
     background-color: #777;
   }
   
-  .empty-column-placeholder {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    border: 2px dashed #ccc;
-    border-radius: 5px;
-    padding: 15px;
-    margin: 8px 0;
-    color: #999;
-    text-align: center;
-    position: absolute;
-    top: 0;
-    left: 3px;
-    right: 3px;
-    bottom: 0;
-    z-index: 0; /* Place it behind the dropzone */
-    pointer-events: none; /* Ensure it doesn't interfere with mouse events */
-  }
-  
-  .empty-column-placeholder p {
-    margin: 0;
-    font-size: 13px;
-  }
-  
   /* Scrollbar styling */
   .stickies::-webkit-scrollbar {
     width: 4px;
@@ -476,14 +443,6 @@
       min-height: 80px; /* Smaller minimum height on smaller screens */
     }
     
-    .empty-column-placeholder {
-      padding: 10px;
-      min-height: 60px;
-    }
-    
-    .empty-column-placeholder p {
-      font-size: 12px;
-    }
   }
   
   @media (max-width: 480px) {
@@ -500,11 +459,6 @@
     .stickies-container {
       gap: 4px;
       min-height: 60px; /* Even smaller minimum height on tiny screens */
-    }
-    
-    .empty-column-placeholder {
-      padding: 8px;
-      min-height: 50px;
     }
     
     .color-option {
