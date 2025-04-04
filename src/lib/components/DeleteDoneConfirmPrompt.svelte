@@ -20,9 +20,9 @@
   }
 </script>
 
-<div class="modal-overlay">
-  <div class="modal">
-    <h2>Delete Done Stickies</h2>
+<div class="modal-overlay" on:click={handleCancel}>
+  <div class="modal" on:click|stopPropagation>
+    <h2>Clear Done Column</h2>
     <p>
       Are you sure you want to delete all {stickies.length} {stickies.length === 1 ? 'sticky' : 'stickies'} 
       from the "Done" column?
