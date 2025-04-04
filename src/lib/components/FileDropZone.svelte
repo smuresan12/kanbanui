@@ -1,6 +1,7 @@
 <script lang="ts">
   import { createEventDispatcher, onMount } from 'svelte';
   import { kanbanStore } from '../stores/kanbanStore';
+  import { pushState } from '$app/navigation';
   
   export let show = false;
   
@@ -110,12 +111,10 @@
   
   function closeModal() {
     // Clear the restore parameter from URL without refreshing page
-    if (window.history.pushState) {
-      const newUrl = new URL(window.location.href);
-      newUrl.searchParams.delete('restore');
-      window.history.pushState({path: newUrl.toString()}, '', newUrl.toString());
-    }
-
+    const newUrl = new URL(window.location.href);
+    newUrl.searchParams.delete('restore');
+    pushState(newUrl.toString(), {});
+    
     show = false;
 
     dispatch('complete');
