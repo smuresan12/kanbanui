@@ -177,7 +177,7 @@ const createKanbanStore = () => {
         
         const newState = {
           ...state,
-          stickies: [...state.stickies, newSticky]
+          stickies: [newSticky, ...state.stickies]
         };
         
         // Add color to usedColors if not already there
