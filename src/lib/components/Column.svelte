@@ -5,6 +5,7 @@
   import { dndzone, SHADOW_ITEM_MARKER_PROPERTY_NAME } from 'svelte-dnd-action';
   import { flip } from 'svelte/animate';
   import { createEventDispatcher, onMount } from 'svelte';
+  import DeleteDoneConfirmPrompt from './DeleteDoneConfirmPrompt.svelte';
   
   export let column: ColumnType;
   export let stickies: StickyType[] = [];
@@ -104,24 +105,46 @@
   // Clean up subscription
   import { onDestroy } from 'svelte';
   onDestroy(unsubscribe);
+  
+  // For Done column delete functionality
+  let showDeleteConfirm = false;
+  
+  function handleDeleteDoneClick() {
+    showDeleteConfirm = true;
+  }
+  
+  function handleDeleteConfirmClose() {
+    showDeleteConfirm = false;
+  }
 </script>
 
 <div class="column">
   <div class="column-header">
     <h2>{column}</h2>
-    {#if isAddingSticky}
-      <button 
-        class="add-sticky-btn" 
-        on:click|stopPropagation|preventDefault={handleCancelBtn}
-        title="Cancel"
-      >✖</button>
-    {:else}
-      <button 
-        class="add-sticky-btn" 
-        on:click|stopPropagation|preventDefault={handleAddBtn}
-        title="Add new sticky"
-      >+</button>
-    {/if}
+    <div class="header-actions">
+      {#if column === 'Done' && stickies.length > 0}
+        <button 
+          class="delete-done-btn" 
+          on:click|stopPropagation|preventDefault={handleDeleteDoneClick}
+          title="Delete all done stickies"
+        >
+          <span class="trash-icon">🗑️</span>
+        </button>
+      {/if}
+      {#if isAddingSticky}
+        <button 
+          class="add-sticky-btn" 
+          on:click|stopPropagation|preventDefault={handleCancelBtn}
+          title="Cancel"
+        >✖</button>
+      {:else}
+        <button 
+          class="add-sticky-btn" 
+          on:click|stopPropagation|preventDefault={handleAddBtn}
+          title="Add new sticky"
+        >+</button>
+      {/if}
+    </div>
   </div>
   
   {#if isAddingSticky}
@@ -191,6 +214,14 @@
   </div>
 </div>
 
+{#if showDeleteConfirm && column === 'Done'}
+  <DeleteDoneConfirmPrompt 
+    stickies={stickies} 
+    on:confirm={handleDeleteConfirmClose}
+    on:cancel={handleDeleteConfirmClose}
+  />
+{/if}
+
 <style>
   .column {
     display: flex;
@@ -218,6 +249,12 @@
     flex-shrink: 0; /* Prevent header from shrinking */
   }
   
+  .header-actions {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+  }
+  
   h2 {
     margin: 0;
     font-size: 18px;
@@ -243,6 +280,33 @@
   .add-sticky-btn:hover {
     background-color: #555;
     transform: scale(1.05);
+  }
+  
+  .delete-done-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background-color: #6c6c6c;
+    color: white;
+    border: none;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  }
+  
+  .delete-done-btn:hover {
+    background-color: #555;
+    transform: scale(1.05);
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.25);
+  }
+  
+  .trash-icon {
+    font-size: 12px;
+    filter: brightness(1.5);
   }
   
   .stickies {

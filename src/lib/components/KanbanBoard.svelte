@@ -3,13 +3,10 @@
   import { COLUMNS, type Sticky } from '../types';
   import { kanbanStore } from '../stores/kanbanStore';
   import Column from './Column.svelte';
-  import CleanupPrompt from './CleanupPrompt.svelte';
   import BackupReminder from './BackupReminder.svelte';
   import FileDropZone from './FileDropZone.svelte';
   
   let stickiesByColumn: Record<string, Sticky[]> = {};
-  let oldDoneStickies: Sticky[] = [];
-  let showCleanupPrompt = false;
   let showBackupReminder = false;
   let showFileDropZone = false;
   let lastBackupDate: string | null = null;
@@ -73,7 +70,7 @@
     }
   }
   
-  // Check for backup needs and old stickies in the Done column on mount
+  // Check for backup needs
   onMount(async () => {
     // Check if we need a backup reminder and if there are stickies to back up
     const needsBackup = await kanbanStore.needsBackupReminder();
@@ -90,12 +87,6 @@
       if (hasStickies) {
         showBackupReminder = true;
       }
-    }
-    
-    // Check if we have old stickies
-    oldDoneStickies = await kanbanStore.getOldDoneStickies();
-    if (oldDoneStickies.length > 0 && !showBackupReminder) {
-      showCleanupPrompt = true;
     }
     
     // Only add event listeners if we're in a browser environment
@@ -122,15 +113,6 @@
   
   function handleBackupComplete() {
     showBackupReminder = false;
-    
-    // After the backup reminder is done, check for old stickies
-    if (oldDoneStickies.length > 0) {
-      showCleanupPrompt = true;
-    }
-  }
-  
-  function handleCleanupComplete() {
-    showCleanupPrompt = false;
   }
   
   function handleFileDropComplete() {
@@ -172,14 +154,6 @@
     show={showFileDropZone} 
     on:complete={handleFileDropComplete}
   />
-  
-  {#if showCleanupPrompt}
-    <CleanupPrompt 
-      oldStickies={oldDoneStickies} 
-      on:confirm={handleCleanupComplete}
-      on:cancel={handleCleanupComplete}
-    />
-  {/if}
 </main>
 
 <style>

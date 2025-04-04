@@ -10,7 +10,6 @@ A local-first Kanban board built with Svelte, TypeScript, and PWA features. This
 - 📱 **PWA support**: Works offline with caching
 - 🎨 **Colorful stickies**: Organize tasks with color coding
 - 🔄 **Drag and drop**: Move tasks between columns
-- 🧹 **Auto-cleanup**: Prompts to remove old completed tasks
 - 📐 **Responsive design**: Works on desktop and mobile
 
 ## Columns
@@ -93,10 +92,6 @@ Drag and drop tasks between columns to update their status.
 ### Deleting Tasks
 
 Click the delete (🗑️) button on a task to remove it.
-
-### Old Task Cleanup
-
-When opening the app, it checks for tasks in the "Done" column that are older than 100 days and asks if you want to delete them.
 
 ## License
 

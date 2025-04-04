@@ -3,7 +3,7 @@
   import { kanbanStore } from '../stores/kanbanStore';
   import type { Sticky } from '../types';
   
-  export let oldStickies: Sticky[] = [];
+  export let stickies: Sticky[] = [];
   
   const dispatch = createEventDispatcher<{
     confirm: void;
@@ -11,7 +11,7 @@
   }>();
   
   function handleConfirm() {
-    kanbanStore.deleteOldDoneStickies();
+    kanbanStore.deleteDoneStickies();
     dispatch('confirm');
   }
   
@@ -22,17 +22,17 @@
 
 <div class="modal-overlay">
   <div class="modal">
-    <h2>Clean Up Old Stickies</h2>
+    <h2>Delete Done Stickies</h2>
     <p>
-      You have {oldStickies.length} {oldStickies.length === 1 ? 'sticky' : 'stickies'} in the "Done" column 
-      that are older than 100 days. Would you like to delete them?
+      Are you sure you want to delete all {stickies.length} {stickies.length === 1 ? 'sticky' : 'stickies'} 
+      from the "Done" column?
     </p>
     
-    {#if oldStickies.length > 0}
+    {#if stickies.length > 0}
       <div class="stickies-list">
         <h3>Stickies to be deleted:</h3>
         <ul>
-          {#each oldStickies as sticky}
+          {#each stickies as sticky}
             <li style="background-color: {sticky.color};">
               {sticky.text}
               <small>Created: {new Date(sticky.createdAt).toLocaleDateString()}</small>
@@ -44,10 +44,10 @@
     
     <div class="modal-actions">
       <button class="cancel-btn" on:click={handleCancel}>
-        Keep them
+        Cancel
       </button>
       <button class="confirm-btn" on:click={handleConfirm}>
-        Yes, delete them
+        Yes, delete all
       </button>
     </div>
   </div>

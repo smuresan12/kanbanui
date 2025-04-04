@@ -283,13 +283,12 @@ const createKanbanStore = () => {
     },
     
     // Reorder column with the list of stickies from the UI
-    reorderColumn: (column: Column, columnStickies: Sticky[]) => {
+    reorderColumn: (column: Column, items: Sticky[]) => {
       update(state => {
-        // Get all stickies that are NOT in this column
-        const otherColumnStickies = state.stickies.filter(s => s.column !== column);
-        
-        // Combine the other column stickies with the reordered stickies for this column
-        const newStickies = [...otherColumnStickies, ...columnStickies];
+        const newStickies = [
+          ...state.stickies.filter(s => s.column !== column),
+          ...items.filter(item => item.column === column)
+        ];
         
         const newState = { ...state, stickies: newStickies };
         
@@ -299,38 +298,15 @@ const createKanbanStore = () => {
       });
     },
     
-    // Check for old stickies in the Done column (older than 100 days)
-    getOldDoneStickies: async () => {
-      const state = await loadState();
-      const now = new Date();
-      const hundredDaysAgo = new Date(now.setDate(now.getDate() - 100));
-      
-      return state.stickies.filter(sticky => {
-        return (
-          sticky.column === 'Done' && 
-          new Date(sticky.createdAt) < hundredDaysAgo
-        );
-      });
-    },
-    
-    // Delete old stickies from Done column
-    deleteOldDoneStickies: () => {
+    // Delete all stickies from Done column
+    deleteDoneStickies: () => {
       update(state => {
-        const now = new Date();
-        const hundredDaysAgo = new Date(now.setDate(now.getDate() - 100));
-        
-        const newStickies = state.stickies.filter(sticky => {
-          // Keep if not in Done column or if not old
-          return (
-            sticky.column !== 'Done' || 
-            new Date(sticky.createdAt) >= hundredDaysAgo
-          );
-        });
+        const newStickies = state.stickies.filter(sticky => sticky.column !== 'Done');
         
         const newState = { ...state, stickies: newStickies };
         
         // Save to IndexedDB
-        saveState(newState).catch(err => console.error('Error deleting old done stickies', err));
+        saveState(newState).catch(err => console.error('Error deleting done stickies', err));
         return newState;
       });
     },
