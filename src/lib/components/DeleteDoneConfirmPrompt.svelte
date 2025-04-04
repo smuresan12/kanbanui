@@ -20,8 +20,12 @@
   }
 </script>
 
-<div class="modal-overlay" on:click={handleCancel}>
-  <div class="modal" on:click|stopPropagation>
+<div class="modal-overlay" 
+  on:click={handleCancel} 
+  on:touchend={handleCancel}>
+  <div class="modal" 
+    on:click|stopPropagation 
+    on:touchend|stopPropagation>
     <h2>Clear Done Column</h2>
     <p>
       Are you sure you want to delete all {stickies.length} {stickies.length === 1 ? 'sticky' : 'stickies'} 

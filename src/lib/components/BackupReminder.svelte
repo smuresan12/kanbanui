@@ -66,8 +66,12 @@
 </script>
 
 {#if show}
-  <div class="modal-backdrop">
-    <div class="modal">
+  <div class="modal-backdrop" 
+    on:click={skipBackup}
+    on:touchend={skipBackup}>
+    <div class="modal" 
+      on:click|stopPropagation
+      on:touchend|stopPropagation>
       <div class="modal-header">
         <h2>Backup Reminder</h2>
       </div>
