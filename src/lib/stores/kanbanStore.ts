@@ -8,6 +8,13 @@ const defaultState: KanbanState = {
   lastBackupDate: null
 };
 
+// Check for reset parameter in URL
+const checkForResetParam = (): boolean => {
+  if (typeof window === 'undefined') return false;
+  const urlParams = new URLSearchParams(window.location.search);
+  return urlParams.has('reset');
+};
+
 // IndexedDB configuration
 const DB_NAME = 'kanban-db';
 const DB_VERSION = 1;
@@ -128,6 +135,26 @@ const createKanbanStore = () => {
       if (state.lastBackupDate === undefined) {
         state.lastBackupDate = null;
       }
+      
+      // Check if reset parameter is in URL
+      if (checkForResetParam()) {
+        // Reset everything except stickies
+        state = {
+          stickies: state.stickies,
+          usedColors: defaultState.usedColors,
+          lastBackupDate: null,
+          disableBackupReminders: false
+        };
+        
+        // Remove the reset parameter from URL
+        const url = new URL(window.location.href);
+        url.searchParams.delete('reset');
+        window.history.replaceState({}, '', url.toString());
+        
+        // Save the reset state
+        saveState(state).catch(err => console.error('Error saving reset state', err));
+      }
+      
       set(state);
     }).catch(error => {
       console.error('Error loading initial state', error);
@@ -387,6 +414,22 @@ const createKanbanStore = () => {
       const sevenDaysAgo = new Date(now.setDate(now.getDate() - 7));
       
       return lastBackup < sevenDaysAgo;
+    },
+    
+    // Reset everything except stickies
+    reset: () => {
+      update(state => {
+        const newState = {
+          stickies: state.stickies,
+          usedColors: defaultState.usedColors,
+          lastBackupDate: null,
+          disableBackupReminders: false
+        };
+        
+        // Save to IndexedDB
+        saveState(newState).catch(err => console.error('Error resetting state', err));
+        return newState;
+      });
     },
     
     // Disable backup reminders permanently

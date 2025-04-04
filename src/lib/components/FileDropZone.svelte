@@ -34,7 +34,6 @@
     e.stopPropagation();
     isDragging = false;
     
-    // Reset messages
     errorMessage = '';
     successMessage = '';
     
