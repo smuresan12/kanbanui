@@ -163,7 +163,7 @@
     <!-- Empty column placeholder outside the dropzone -->
     {#if stickies.length === 0}
       <div class="empty-column-placeholder">
-        <p>Drop stickies here or add a new one</p>
+        <p>Drop stickies here or create a new one</p>
       </div>
     {/if}
     
@@ -174,7 +174,8 @@
       use:dndzone={{
         items: stickies, 
         flipDurationMs, 
-        type: "sticky"
+        type: "sticky",
+        dropTargetStyle: { outline: 'none' }
       }}
       on:consider={handleDndConsider}
       on:finalize={handleDndFinalize}
@@ -386,7 +387,7 @@
     gap: 6px;
   }
   
-  .add-btn, .cancel-btn {
+  .cancel-btn {
     padding: 5px 10px;
     background-color: #333;
     color: white;
@@ -395,10 +396,6 @@
     cursor: pointer;
     font-size: 13px;
     transition: all 0.2s;
-  }
-  
-  .add-btn:hover {
-    background-color: #555;
   }
   
   .cancel-btn {

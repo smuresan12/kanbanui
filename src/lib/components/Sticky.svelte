@@ -457,7 +457,7 @@
     margin-top: auto;
   }
   
-  .cancel-btn, .save-btn {
+  .cancel-btn {
     padding: 5px 8px;
     border: none;
     border-radius: 3px;
@@ -465,16 +465,7 @@
     cursor: pointer;
     transition: all 0.2s;
   }
-  
-  .save-btn {
-    background-color: rgba(0, 0, 0, 0.6);
-    color: white;
-  }
-  
-  .save-btn:hover {
-    background-color: rgba(0, 0, 0, 0.8);
-  }
-  
+
   .cancel-btn {
     background-color: rgba(0, 0, 0, 0.2);
     color: rgba(0, 0, 0, 0.7);
@@ -525,7 +516,7 @@
       font-size: 13px;
     }
     
-    .cancel-btn, .save-btn {
+    .cancel-btn {
       padding: 4px 6px;
       font-size: 11px;
     }
