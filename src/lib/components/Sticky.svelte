@@ -270,7 +270,7 @@
     text-shadow: none;
     width: 100%;
     box-sizing: border-box;
-    transition: font-size 0.2s ease, color 0.2s ease;
+    transition: color 0.2s ease;
     font-weight: 600;
     text-align: center;
   }
