@@ -6,7 +6,6 @@ export interface Sticky {
   color: string;
   column: string;
   createdAt: string; // ISO date string
-  isEditing: boolean; // Flag to indicate if the sticky is being edited
   // Add index signature for dnd-action shadow item marker
   [key: string]: string | boolean | string;
 }

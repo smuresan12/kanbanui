@@ -5,6 +5,7 @@
   import { SHADOW_ITEM_MARKER_PROPERTY_NAME } from 'svelte-dnd-action';
   
   export let sticky: Sticky;
+  export let isEditing = false;
   
   // Check if this is a shadow item (being dragged)
   // This checks both for the SHADOW_ITEM_MARKER_PROPERTY_NAME property
@@ -104,7 +105,7 @@
   }
   
   function handleEdit() {
-    sticky.isEditing = true;
+    isEditing = true;
     // Use setTimeout to ensure the textarea is rendered
     setTimeout(() => {
       const textarea = editForm?.querySelector('textarea');
@@ -121,12 +122,12 @@
         color: editableColor
       });
     }
-    sticky.isEditing = false;
+    isEditing = false;
     dispatch('editDone', { id: sticky.id });
   }
   
   function handleCancel() {
-    sticky.isEditing = false;
+    isEditing = false;
     editableText = sticky.text;
     editableColor = sticky.color;
     dispatch('editDone', { id: sticky.id });
@@ -147,7 +148,7 @@
   
   // Handle click outside
   function handleClickOutside(event: Event) {
-    if (sticky.isEditing && editForm && 
+    if (isEditing && editForm && 
         !editForm.contains(event.target as Node)) {
       
       if (editableText.trim()) {
@@ -183,7 +184,7 @@
   bind:this={stickyElement}
   data-is-handle="true"
 >
-  {#if sticky.isEditing}
+  {#if isEditing}
     <div class="sticky-edit" bind:this={editForm} on:click|stopPropagation>
       <textarea 
         bind:value={editableText}
