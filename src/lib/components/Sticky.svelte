@@ -289,15 +289,9 @@
     transition: none !important;
     animation: none !important;
   }
-  
-  /* Make sure control buttons stay visible when dragged */
-  .sticky.is-dragged .sticky-controls {
-    opacity: 1 !important;
-  }
 
   /* Prevent hover effects during drag */
   .sticky.is-dragged:hover,
-  .sticky.is-dragged .edit-btn:hover,
   .sticky.is-dragged .delete-btn:hover {
     transform: none !important;
   }
@@ -342,21 +336,7 @@
     justify-content: center;
   }
   
-  .sticky-controls {
-    display: flex;
-    justify-content: center;
-    margin-top: 8px;
-    opacity: 0.4;
-    transition: opacity 0.2s;
-    flex-wrap: nowrap;
-    gap: clamp(16px, 2vw, 32px);
-  }
-  
-  .sticky:hover .sticky-controls {
-    opacity: 1;
-  }
-  
-  .edit-btn, .delete-btn {
+ .delete-btn {
     background: none;
     border: none;
     cursor: pointer;
@@ -373,7 +353,7 @@
     z-index: 2;
   }
   
-  .edit-btn:hover, .delete-btn:hover {
+ .delete-btn:hover {
     background-color: rgba(255, 255, 255, 0.6);
     transform: scale(1.1);
   }
@@ -506,7 +486,7 @@
       font-size: min(14px, 4cqw);
     }
     
-    .edit-btn, .delete-btn {
+    .delete-btn {
       min-width: 22px;
       min-height: 22px;
       font-size: 13px;
@@ -552,7 +532,7 @@
       font-size: min(12px, 3.5cqw);
     }
     
-    .edit-btn, .delete-btn {
+    .delete-btn {
       min-width: 20px;
       min-height: 20px;
       font-size: 12px;
@@ -561,10 +541,6 @@
     .sticky-edit textarea {
       min-height: 45px;
       padding: 4px;
-    }
-    
-    .sticky-controls {
-      margin-top: 6px;
     }
     
     .color-option {
