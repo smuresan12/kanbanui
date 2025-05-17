@@ -116,6 +116,24 @@
   function handleDeleteConfirmClose() {
     showDeleteConfirm = false;
   }
+
+  // Function to determine text color based on background color
+  function getContrastColor(hexColor: string): string {
+    // Remove the hash if it exists
+    const color = hexColor.replace('#', '');
+    
+    // Convert to RGB
+    const r = parseInt(color.substring(0, 2), 16) || 0;
+    const g = parseInt(color.substring(2, 4), 16) || 0;
+    const b = parseInt(color.substring(4, 6), 16) || 0;
+    
+    // Calculate luminance - using the formula for relative luminance
+    // See: https://www.w3.org/TR/WCAG20/#relativeluminancedef
+    const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+    
+    // Return white for dark colors and black for light colors
+    return luminance > 0.5 ? 'rgba(0, 0, 0, 0.9)' : 'rgba(255, 255, 255, 0.9)';
+  }
 </script>
 
 <div class="column">
@@ -171,12 +189,19 @@
         
         <div class="color-input">
           <input type="color" bind:value={newStickyColor} id="newStickyColor">
-          <label for="newStickyColor">Custom</label>
+          <label for="newStickyColor" style="color: {getContrastColor(newStickyColor)};">Custom</label>
         </div>
       </div>
       
-      <div class="form-actions">
-        <button class="cancel-btn" on:click|stopPropagation|preventDefault={handleCancelBtn}>Cancel</button>
+      <div class="sticky-actions">
+        <button 
+          class="icon-btn cancel-btn" 
+          on:click|stopPropagation|preventDefault={handleCancelBtn}
+          title="Cancel">❌</button>
+        <button 
+          class="icon-btn save-btn" 
+          on:click|stopPropagation|preventDefault={handleAddSticky}
+          title="Save">💾</button>
       </div>
     </div>
   {/if}
@@ -438,29 +463,32 @@
     color: rgba(0, 0, 0, 0.7);
   }
   
-  .form-actions {
+  .sticky-actions {
     display: flex;
     justify-content: flex-end;
     gap: 6px;
   }
   
-  .cancel-btn {
-    padding: 5px 10px;
-    background-color: #333;
-    color: white;
+  .icon-btn {
+    background: none;
     border: none;
-    border-radius: 4px;
     cursor: pointer;
-    font-size: 13px;
+    padding: 2px;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 26px;
+    min-height: 26px;
+    border-radius: 50%;
     transition: all 0.2s;
+    background-color: rgba(200, 200, 200, 0.3);
+    z-index: 2;
   }
   
-  .cancel-btn {
-    background-color: #999;
-  }
-  
-  .cancel-btn:hover {
-    background-color: #777;
+  .icon-btn:hover {
+    background-color: rgba(200, 200, 200, 0.6);
+    transform: scale(1.1);
   }
   
   /* Scrollbar styling */
@@ -531,4 +559,4 @@
       height: 18px;
     }
   }
-</style> 
+</style>
