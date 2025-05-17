@@ -1,15 +1,13 @@
-export type Column = 'Backlog' | 'To Do' | 'In Progress' | 'Done';
-
-export const COLUMNS: Column[] = ['Backlog', 'To Do', 'In Progress', 'Done'];
+export const COLUMNS: string[] = ['Backlog', 'To Do'/*, 'In Progress'*/, 'Done'];
 
 export interface Sticky {
   id: string;
   text: string;
   color: string;
-  column: Column;
+  column: string;
   createdAt: string; // ISO date string
   // Add index signature for dnd-action shadow item marker
-  [key: string]: string | boolean | Column;
+  [key: string]: string | boolean | string;
 }
 
 export interface KanbanState {

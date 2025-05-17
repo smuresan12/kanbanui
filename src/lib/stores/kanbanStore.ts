@@ -1,5 +1,5 @@
 import { writable } from 'svelte/store';
-import type { KanbanState, Sticky, Column } from '../types';
+import type { KanbanState, Sticky } from '../types';
 
 // Initial state
 const defaultState: KanbanState = {
@@ -201,11 +201,7 @@ const createKanbanStore = () => {
             // Apply each update in a type-safe way
             if (typeof updates.text === 'string') updatedSticky.text = updates.text;
             if (typeof updates.color === 'string') updatedSticky.color = updates.color;
-            if (updates.column && 
-                (updates.column === 'Backlog' || 
-                 updates.column === 'To Do' || 
-                 updates.column === 'In Progress' || 
-                 updates.column === 'Done')) {
+            if (updates.column && typeof updates.column === 'string') {
               updatedSticky.column = updates.column;
             }
             

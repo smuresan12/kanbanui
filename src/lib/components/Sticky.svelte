@@ -217,9 +217,18 @@
       </div>
       
       <div class="sticky-actions">
-        <button class="cancel-btn" on:click|stopPropagation|preventDefault={handleCancel} style="color: {editableTextColor};">Cancel</button>
         <button 
-          class="delete-btn" 
+          class="icon-btn cancel-btn" 
+          on:click|stopPropagation|preventDefault={handleCancel}
+          data-no-dnd="true" 
+          title="Cancel">❌</button>
+        <button 
+          class="icon-btn save-btn" 
+          on:click|stopPropagation|preventDefault={handleSave}
+          data-no-dnd="true"
+          title="Save">💾</button>
+        <button 
+          class="icon-btn delete-btn" 
           on:click|stopPropagation|preventDefault={handleDelete} 
           data-no-dnd="true"
           title="Delete">🗑️</button>
@@ -438,22 +447,26 @@
     margin-top: auto;
   }
   
-  .cancel-btn {
-    padding: 5px 8px;
+  .icon-btn {
+    background: none;
     border: none;
-    border-radius: 3px;
-    font-size: 12px;
     cursor: pointer;
+    padding: 2px;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 26px;
+    min-height: 26px;
+    border-radius: 50%;
     transition: all 0.2s;
-  }
-
-  .cancel-btn {
-    background-color: rgba(0, 0, 0, 0.2);
-    color: rgba(0, 0, 0, 0.7);
+    background-color: rgba(255, 255, 255, 0.3);
+    z-index: 2;
   }
   
-  .cancel-btn:hover {
-    background-color: rgba(0, 0, 0, 0.3);
+  .icon-btn:hover {
+    background-color: rgba(255, 255, 255, 0.6);
+    transform: scale(1.1);
   }
   
   /* Mobile-specific adjustments */
