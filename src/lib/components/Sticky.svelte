@@ -149,8 +149,7 @@
   // Handle click outside
   function handleClickOutside(event: Event) {
     if (isEditing && editForm && 
-        !editForm.contains(event.target as Node) && 
-        !(event.target as HTMLElement).classList.contains('edit-btn')) {
+        !editForm.contains(event.target as Node)) {
       
       if (editableText.trim()) {
         handleSave();
@@ -183,6 +182,7 @@
   class:short-text={sticky.text.length > 20 && sticky.text.length <= 50}
   class:very-short-text={sticky.text.length <= 20}
   bind:this={stickyElement}
+  data-is-handle="true"
 >
   {#if isEditing}
     <div class="sticky-edit" bind:this={editForm} on:click|stopPropagation>
@@ -221,11 +221,14 @@
       </div>
     </div>
   {:else}
-    <div class="sticky-content">
+    <div class="sticky-content" on:dblclick|stopPropagation|preventDefault={handleEdit}>
       <p style="color: {textColor};" bind:this={textElement}>{sticky.text}</p>
       <div class="sticky-controls">
-        <button class="edit-btn" on:click|stopPropagation|preventDefault={handleEdit} title="Edit">✏️</button>
-        <button class="delete-btn" on:click|stopPropagation|preventDefault={handleDelete} title="Delete">🗑️</button>
+        <button 
+          class="delete-btn" 
+          on:click|stopPropagation|preventDefault={handleDelete} 
+          data-no-dnd="true"
+          title="Delete">🗑️</button>
       </div>
     </div>
   {/if}
@@ -371,6 +374,7 @@
     border-radius: 50%;
     transition: all 0.2s;
     background-color: rgba(255, 255, 255, 0.3);
+    z-index: 2;
   }
   
   .edit-btn:hover, .delete-btn:hover {
@@ -572,4 +576,4 @@
       height: 18px;
     }
   }
-</style> 
+</style>
