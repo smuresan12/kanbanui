@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { Column as ColumnType, Sticky as StickyType } from '../types';
+  import type { Sticky as StickyType } from '../types';
   import Sticky from './Sticky.svelte';
   import { kanbanStore } from '../stores/kanbanStore';
   import { dndzone, SHADOW_ITEM_MARKER_PROPERTY_NAME } from 'svelte-dnd-action';
@@ -7,7 +7,7 @@
   import { createEventDispatcher, onMount } from 'svelte';
   import DeleteDoneConfirmPrompt from './DeleteDoneConfirmPrompt.svelte';
   
-  export let column: ColumnType;
+  export let column: string;
   export let stickies: StickyType[] = [];
   
   let isAddingSticky = false;
