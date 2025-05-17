@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { Column as ColumnType, Sticky as StickyType } from '../types';
+  import type { Sticky as StickyType } from '../types';
   import Sticky from './Sticky.svelte';
   import { kanbanStore } from '../stores/kanbanStore';
   import { dndzone, SHADOW_ITEM_MARKER_PROPERTY_NAME } from 'svelte-dnd-action';
@@ -7,15 +7,12 @@
   import { createEventDispatcher, onMount } from 'svelte';
   import DeleteDoneConfirmPrompt from './DeleteDoneConfirmPrompt.svelte';
   
-  export let column: ColumnType;
+  export let column: string;
   export let stickies: StickyType[] = [];
   
-  let isAddingSticky = false;
-  let newStickyText = '';
-  let newStickyColor = '#ffcc00';
   let editingStickyId: string | null = null;
-  let addStickyForm: HTMLDivElement;
   let usedColors: string[] = [];
+  let defaultColor = '#ffcc00';
   
   const flipDurationMs = 200;
   const dispatch = createEventDispatcher();
@@ -23,14 +20,13 @@
   // Subscribe to the store to get used colors
   const unsubscribe = kanbanStore.subscribe(state => {
     usedColors = state.usedColors;
+    // Set default color to the first available color or default to yellow
+    defaultColor = usedColors.length > 0 ? usedColors[0] : '#ffcc00';
   });
   
   function handleAddSticky() {
-    if (newStickyText.trim()) {
-      kanbanStore.addSticky(newStickyText.trim(), newStickyColor, column);
-      newStickyText = '';
-      isAddingSticky = false;
-    }
+    // Add a new sticky with empty text
+    kanbanStore.addSticky("", defaultColor, column, true);
   }
   
   function handleDeleteSticky(event: CustomEvent<{ id: string }>) {
@@ -54,53 +50,6 @@
     stickies = e.detail.items;
     dispatch('finalize', e.detail);
   }
-  
-  function handleKeyDown(event: KeyboardEvent) {
-    if (event.key === 'Enter' && !event.shiftKey) {
-      event.preventDefault();
-      handleAddSticky();
-    } else if (event.key === 'Escape') {
-      isAddingSticky = false;
-      newStickyText = '';
-    }
-  }
-  
-  // Handle click outside
-  function handleClickOutside(event: Event) {
-    // Check if user clicked outside the form
-    if (isAddingSticky && addStickyForm && 
-        !addStickyForm.contains(event.target as Node) && 
-        !(event.target as HTMLElement).classList.contains('add-sticky-btn')) {
-      
-      if (newStickyText.trim()) {
-        handleAddSticky();
-      } else {
-        isAddingSticky = false;
-      }
-    }
-  }
-  
-  function handleCancelBtn() {
-    isAddingSticky = false;
-    newStickyText = '';
-    // Force a focus on the document body to ensure form loses focus
-    if (typeof document !== 'undefined') {
-      document.body.focus();
-    }
-  }
-  
-  function handleAddBtn() {
-    isAddingSticky = true;
-  }
-  
-  onMount(() => {
-    if (typeof window !== 'undefined') {
-      window.addEventListener('click', handleClickOutside);
-      return () => {
-        window.removeEventListener('click', handleClickOutside);
-      };
-    }
-  });
   
   // Clean up subscription
   import { onDestroy } from 'svelte';
@@ -131,55 +80,13 @@
           <span class="trash-icon">🗑️</span>
         </button>
       {/if}
-      {#if isAddingSticky}
-        <button 
-          class="add-sticky-btn" 
-          on:click|stopPropagation|preventDefault={handleCancelBtn}
-          title="Cancel"
-        >✖</button>
-      {:else}
-        <button 
-          class="add-sticky-btn" 
-          on:click|stopPropagation|preventDefault={handleAddBtn}
-          title="Add new sticky"
-        >+</button>
-      {/if}
+      <button 
+        class="add-sticky-btn" 
+        on:click|stopPropagation|preventDefault={handleAddSticky}
+        title="Add new sticky"
+      >+</button>
     </div>
   </div>
-  
-  {#if isAddingSticky}
-    <div class="add-sticky-form" bind:this={addStickyForm} on:click|stopPropagation>
-      <textarea
-        bind:value={newStickyText}
-        on:keydown={handleKeyDown}
-        placeholder="Enter sticky text..."
-        autoFocus
-      ></textarea>
-      
-      <div class="color-selector">
-        <div class="color-options">
-          {#each usedColors as color}
-            <button 
-              class="color-option" 
-              style="background-color: {color}" 
-              class:selected={newStickyColor === color}
-              on:click={() => newStickyColor = color}
-              title={color}
-            ></button>
-          {/each}
-        </div>
-        
-        <div class="color-input">
-          <input type="color" bind:value={newStickyColor} id="newStickyColor">
-          <label for="newStickyColor">Custom</label>
-        </div>
-      </div>
-      
-      <div class="form-actions">
-        <button class="cancel-btn" on:click|stopPropagation|preventDefault={handleCancelBtn}>Cancel</button>
-      </div>
-    </div>
-  {/if}
   
   <div class="stickies">
     <section 
@@ -202,8 +109,7 @@
           data-is-dnd-shadow-item-hint={sticky[SHADOW_ITEM_MARKER_PROPERTY_NAME]}
         >
           <Sticky 
-            {sticky} 
-            isEditing={editingStickyId === sticky.id}
+            bind:sticky={sticky} 
             on:delete={handleDeleteSticky}
             on:editDone={() => editingStickyId = null}
           />
@@ -358,111 +264,6 @@
     transition: none !important;
   }
   
-  .add-sticky-form {
-    margin-bottom: 10px;
-    background-color: white;
-    padding: 8px;
-    border-radius: 4px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    flex-shrink: 0; /* Prevent form from shrinking */
-  }
-  
-  textarea {
-    width: 100%;
-    min-height: 70px;
-    padding: 8px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    margin-bottom: 8px;
-    font-family: inherit;
-    font-size: 14px;
-    resize: vertical;
-    background-color: white;
-    color: black;
-  }
-  
-  textarea:focus {
-    outline: none;
-    border-color: #aaa;
-  }
-  
-  .color-selector {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    margin-bottom: 8px;
-  }
-  
-  .color-options {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 4px;
-  }
-  
-  .color-option {
-    width: 22px;
-    height: 22px;
-    border-radius: 50%;
-    border: 2px solid transparent;
-    cursor: pointer;
-    transition: all 0.2s;
-    padding: 0;
-  }
-  
-  .color-option:hover {
-    transform: scale(1.1);
-  }
-  
-  .color-option.selected {
-    border-color: rgba(0, 0, 0, 0.3);
-    transform: scale(1.1);
-  }
-  
-  .color-input {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    margin-top: 4px;
-  }
-  
-  .color-input input {
-    width: 20px;
-    height: 20px;
-    padding: 0;
-    border: none;
-    cursor: pointer;
-  }
-  
-  .color-input label {
-    font-size: 12px;
-    color: rgba(0, 0, 0, 0.7);
-  }
-  
-  .form-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 6px;
-  }
-  
-  .cancel-btn {
-    padding: 5px 10px;
-    background-color: #333;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 13px;
-    transition: all 0.2s;
-  }
-  
-  .cancel-btn {
-    background-color: #999;
-  }
-  
-  .cancel-btn:hover {
-    background-color: #777;
-  }
-  
   /* Scrollbar styling */
   .stickies::-webkit-scrollbar {
     width: 4px;
@@ -526,9 +327,5 @@
       min-height: 60px; /* Even smaller minimum height on tiny screens */
     }
     
-    .color-option {
-      width: 18px;
-      height: 18px;
-    }
   }
-</style> 
+</style>

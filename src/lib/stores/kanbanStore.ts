@@ -165,14 +165,15 @@ const createKanbanStore = () => {
     subscribe,
     
     // Add a new sticky
-    addSticky: (text: string, color: string, column: Column) => {
+    addSticky: (text: string, color: string, column: string, isEditing=false) => {
       update(state => {
         const newSticky: Sticky = {
           id: crypto.randomUUID(),
           text,
           color,
           column,
-          createdAt: new Date().toISOString()
+          createdAt: new Date().toISOString(),
+          isEditing
         };
         
         const newState = {
@@ -247,7 +248,7 @@ const createKanbanStore = () => {
     },
     
     // Move a sticky to a different column
-    moveSticky: (id: string, toColumn: Column) => {
+    moveSticky: (id: string, toColumn: string) => {
       update(state => {
         const updatedStickies = state.stickies.map(sticky => 
           sticky.id === id ? { ...sticky, column: toColumn } : sticky
@@ -306,7 +307,7 @@ const createKanbanStore = () => {
     },
     
     // Reorder column with the list of stickies from the UI
-    reorderColumn: (column: Column, items: Sticky[]) => {
+    reorderColumn: (column: string, items: Sticky[]) => {
       update(state => {
         const newStickies = [
           ...state.stickies.filter(s => s.column !== column),
