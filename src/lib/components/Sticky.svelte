@@ -218,18 +218,16 @@
       
       <div class="sticky-actions">
         <button class="cancel-btn" on:click|stopPropagation|preventDefault={handleCancel} style="color: {editableTextColor};">Cancel</button>
-      </div>
-    </div>
-  {:else}
-    <div class="sticky-content" on:dblclick|stopPropagation|preventDefault={handleEdit}>
-      <p style="color: {textColor};" bind:this={textElement}>{sticky.text}</p>
-      <div class="sticky-controls">
         <button 
           class="delete-btn" 
           on:click|stopPropagation|preventDefault={handleDelete} 
           data-no-dnd="true"
           title="Delete">🗑️</button>
       </div>
+    </div>
+  {:else}
+    <div class="sticky-content" on:dblclick|stopPropagation|preventDefault={handleEdit}>
+      <p style="color: {textColor};" bind:this={textElement}>{sticky.text}</p>
     </div>
   {/if}
 </div>
@@ -340,10 +338,8 @@
     min-height: 40px;
     flex: 1;
     display: flex;
-    flex-direction: column;
-    justify-content: space-between;
     align-items: center;
-    text-align: center;
+    justify-content: center;
   }
   
   .sticky-controls {
