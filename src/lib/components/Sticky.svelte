@@ -245,7 +245,7 @@
             ></button>
           {/each}
         </div>
-        
+        <!--
         <div class="color-input">
           <input 
             type="color" 
@@ -254,6 +254,7 @@
           >
           <label for="colorPicker" style="color: {editableTextColor};">Custom</label>
         </div>
+      -->
       </div>
       
       <div class="sticky-actions">

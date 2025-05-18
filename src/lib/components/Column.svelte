@@ -187,10 +187,12 @@
           {/each}
         </div>
         
+        <!--
         <div class="color-input">
           <input type="color" bind:value={newStickyColor} id="newStickyColor">
           <label for="newStickyColor" style="color: {getContrastColor(newStickyColor)};">Custom</label>
         </div>
+        -->
       </div>
       
       <div class="sticky-actions">
