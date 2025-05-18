@@ -40,6 +40,7 @@
 		"vitest": "^3.0.0"
 	},
 	"dependencies": {
-		"svelte-dnd-action": "0.9.60"
+		"svelte-dnd-action": "0.9.60",
+		"svelte-gestures": "5.1.4"
 	}
 }

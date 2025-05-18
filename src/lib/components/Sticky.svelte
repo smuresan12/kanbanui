@@ -3,9 +3,49 @@
   import type { Sticky } from '../types';
   import { kanbanStore } from '../stores/kanbanStore';
   import { SHADOW_ITEM_MARKER_PROPERTY_NAME } from 'svelte-dnd-action';
+  import { setPointerControls, DEFAULT_DELAY } from 'svelte-gestures';
   
   export let sticky: Sticky;
   export let isEditing = false;
+
+  function doubletap(node, parameters = { timeframe: DEFAULT_DELAY }) {
+    const gestureName = 'doubletap';
+    
+    let startTime;
+    let tapCount = 0;
+    let timeout;
+
+    function onUp(activeEvents, event) {
+      if (
+        Date.now() - startTime < parameters.timeframe
+      ) {
+        if (!tapCount) {
+          tapCount++;
+        } else {
+
+          node.dispatchEvent(
+            new CustomEvent(gestureName, {
+            })
+          );
+
+          clearTimeout(timeout);
+          tapCount = 0;
+        }
+      }
+    }
+
+    function onDown(activeEvents, event) {
+      if (!tapCount) {
+        startTime = Date.now();
+      }
+
+      timeout = setTimeout(() => {
+        tapCount = 0;
+      }, parameters.timeframe);
+    }
+
+    return setPointerControls(gestureName, node, null, onDown, onUp);
+  }
   
   // Check if this is a shadow item (being dragged)
   // This checks both for the SHADOW_ITEM_MARKER_PROPERTY_NAME property
@@ -235,7 +275,15 @@
       </div>
     </div>
   {:else}
-    <div class="sticky-content" on:dblclick|stopPropagation|preventDefault={handleEdit}>
+    <div 
+      class="sticky-content" 
+      on:dblclick|stopPropagation|preventDefault={handleEdit}
+      use:doubletap
+	    on:doubletap={handleEdit}
+      role="button" 
+      tabindex="0"
+      aria-label="Edit sticky note"
+    >
       <p style="color: {textColor};" bind:this={textElement}>{sticky.text}</p>
     </div>
   {/if}
