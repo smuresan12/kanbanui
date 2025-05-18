@@ -194,14 +194,18 @@
       </div>
       
       <div class="sticky-actions">
-        <button 
-          class="icon-btn cancel-btn" 
-          on:click|stopPropagation|preventDefault={handleCancelBtn}
-          title="Cancel">❌</button>
-        <button 
-          class="icon-btn save-btn" 
-          on:click|stopPropagation|preventDefault={handleAddSticky}
-          title="Save">💾</button>
+        <div class="left-actions">
+          <button 
+            class="icon-btn cancel-btn" 
+            on:click|stopPropagation|preventDefault={handleCancelBtn}
+            title="Cancel">❌</button>
+        </div>
+        <div class="right-actions">
+          <button 
+            class="icon-btn save-btn" 
+            on:click|stopPropagation|preventDefault={handleAddSticky}
+            title="Save">💾</button>
+        </div>
       </div>
     </div>
   {/if}
@@ -465,8 +469,18 @@
   
   .sticky-actions {
     display: flex;
-    justify-content: flex-end;
+    justify-content: space-between;
     gap: 6px;
+  }
+  
+  .left-actions {
+    display: flex;
+    align-items: center;
+  }
+  
+  .right-actions {
+    display: flex;
+    align-items: center;
   }
   
   .icon-btn {

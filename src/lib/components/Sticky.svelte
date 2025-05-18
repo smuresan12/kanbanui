@@ -257,21 +257,25 @@
       </div>
       
       <div class="sticky-actions">
-        <button 
-          class="icon-btn cancel-btn" 
-          on:click|stopPropagation|preventDefault={handleCancel}
-          data-no-dnd="true" 
-          title="Cancel">❌</button>
-        <button 
-          class="icon-btn save-btn" 
-          on:click|stopPropagation|preventDefault={handleSave}
-          data-no-dnd="true"
-          title="Save">💾</button>
-        <button 
-          class="icon-btn delete-btn" 
-          on:click|stopPropagation|preventDefault={handleDelete} 
-          data-no-dnd="true"
-          title="Delete">🗑️</button>
+        <div class="left-actions">
+          <button 
+            class="icon-btn cancel-btn" 
+            on:click|stopPropagation|preventDefault={handleCancel}
+            data-no-dnd="true" 
+            title="Cancel">❌</button>
+          <button 
+            class="icon-btn delete-btn" 
+            on:click|stopPropagation|preventDefault={handleDelete} 
+            data-no-dnd="true"
+            title="Delete">🗑️</button>
+        </div>
+        <div class="right-actions">
+          <button 
+            class="icon-btn save-btn" 
+            on:click|stopPropagation|preventDefault={handleSave}
+            data-no-dnd="true"
+            title="Save">💾</button>
+        </div>
       </div>
     </div>
   {:else}
@@ -490,9 +494,19 @@
   
   .sticky-actions {
     display: flex;
-    justify-content: flex-end;
+    justify-content: space-between;
     gap: 5px;
     margin-top: auto;
+  }
+  
+  .left-actions {
+    display: flex;
+    gap: 4px;
+  }
+  
+  .right-actions {
+    display: flex;
+    gap: 4px;
   }
   
   .icon-btn {
