@@ -510,7 +510,7 @@
   
   /* Scrollbar styling */
   .stickies::-webkit-scrollbar {
-    width: 12px;
+    width: 18px;
   }
   
   .stickies::-webkit-scrollbar-track {
