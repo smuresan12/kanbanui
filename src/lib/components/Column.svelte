@@ -342,6 +342,7 @@
   .stickies {
     flex: 1;
     overflow-y: auto;
+    scrollbar-width: auto;
     overflow-x: hidden;
     margin: 0 -3px; /* Give space for the shadows of stickies */
     padding: 0 3px; /* Compensate for the negative margin */
@@ -514,16 +515,22 @@
   
   .stickies::-webkit-scrollbar-track {
     background: #f1f1f1;
-    border-radius: 2px;
+    border-radius: 6px;
+    margin: 2px;
   }
   
   .stickies::-webkit-scrollbar-thumb {
-    background: #ddd;
-    border-radius: 2px;
+    background: #bbb;
+    border-radius: 6px;
+    border: 2px solid #f1f1f1;
   }
   
   .stickies::-webkit-scrollbar-thumb:hover {
-    background: #ccc;
+    background: #888;
+  }
+  
+  .stickies::-webkit-scrollbar-thumb:active {
+    background: #666;
   }
   
   @media (max-width: 768px) {
