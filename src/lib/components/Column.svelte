@@ -509,7 +509,7 @@
   
   /* Scrollbar styling */
   .stickies::-webkit-scrollbar {
-    width: 4px;
+    width: 12px;
   }
   
   .stickies::-webkit-scrollbar-track {
