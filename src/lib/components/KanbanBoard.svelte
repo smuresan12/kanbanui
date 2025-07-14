@@ -111,10 +111,6 @@
     e.preventDefault();
   }
   
-  function handleBackupComplete() {
-    showBackupReminder = false;
-  }
-  
   function handleFileDropComplete() {
     showFileDropZone = false;
   }
@@ -145,9 +141,8 @@
   </div>
   
   <BackupReminder 
-    show={showBackupReminder}
+    bind:show={showBackupReminder}
     {lastBackupDate}
-    on:complete={handleBackupComplete}
   />
   
   <FileDropZone 

@@ -1,11 +1,7 @@
 <script lang="ts">
-  import { createEventDispatcher, onMount } from 'svelte';
   import { kanbanStore } from '../stores/kanbanStore';
   
-  export let show = false;
-  export let lastBackupDate: string | null = null;
-  
-  const dispatch = createEventDispatcher();
+  let { show = $bindable(), lastBackupDate = null } = $props();
   
   // Format the last backup date
   function formatDate(dateString: string): string {
@@ -47,33 +43,42 @@
       downloadLink.click();
       document.body.removeChild(downloadLink);
       
-      dispatch('complete');
+      // Close the modal
+      show = false;
     } catch (error) {
       console.error('Error creating backup', error);
     }
   }
   
-  // Skip backup this time
-  function skipBackup() {
-    dispatch('complete');
+  // Skip backup for one week
+  function skipForWeek() {
+    kanbanStore.skipBackupForWeek();
+    show = false;
   }
   
   // Disable backups permanently
-  function disableBackups() {
+  function skipForever() {
     kanbanStore.disableBackupReminders();
-    dispatch('complete');
+    show = false;
   }
 </script>
 
 {#if show}
   <div class="modal-backdrop" 
-    on:click={skipBackup}
-    on:touchend={skipBackup}>
+    role="button"
+    tabindex="0"
+    onclick={skipForWeek}
+    onkeydown={(e) => { if (e.key === 'Escape') skipForWeek(); }}
+    ontouchend={skipForWeek}>
     <div class="modal" 
-      on:click|stopPropagation
-      on:touchend|stopPropagation>
+      role="dialog"
+      tabindex="-1"
+      aria-labelledby="modal-title"
+      onclick={(e) => e.stopPropagation()}
+      onkeydown={(e) => e.stopPropagation()}
+      ontouchend={(e) => e.stopPropagation()}>
       <div class="modal-header">
-        <h2>Backup Reminder</h2>
+        <h2 id="modal-title">Backup Reminder</h2>
       </div>
       <div class="modal-content">
         <p>It's recommended to back up your data weekly. Would you like to create a backup now?</p>
@@ -85,10 +90,10 @@
         {/if}
       </div>
       <div class="modal-footer">
-        <button class="text-button" on:click={disableBackups}>Never Show</button>
+        <button class="button" onclick={skipForever}>Skip Forever</button>
         <div class="spacer"></div>
-        <button class="secondary" on:click={skipBackup}>Skip</button>
-        <button class="primary" on:click={downloadBackup}>Download Backup</button>
+        <button class="button" onclick={skipForWeek}>Skip a Week</button>
+        <button class="button primary" onclick={downloadBackup}>Download Backup</button>
       </div>
     </div>
   </div>
@@ -106,6 +111,10 @@
     align-items: center;
     justify-content: center;
     z-index: 1000;
+  }
+  
+  .modal-backdrop:focus {
+    outline: none;
   }
   
   .modal {
@@ -161,43 +170,41 @@
     flex: 1;
   }
   
-  button {
+  .button {
     padding: 8px 16px;
     border-radius: 4px;
     font-size: 14px;
     font-weight: 500;
     cursor: pointer;
     transition: background-color 0.2s, box-shadow 0.2s;
-    border: none;
-  }
-  
-  .text-button {
-    background: none;
-    padding: 8px 0;
-    color: #666;
-    text-decoration: underline;
-  }
-  
-  .text-button:hover {
-    color: #333;
-  }
-  
-  .secondary {
+    border: 1px solid #ddd;
     background-color: #f5f5f5;
     color: #333;
   }
   
-  .secondary:hover {
+  .button:hover {
     background-color: #e5e5e5;
+    border-color: #bbb;
   }
   
-  .primary {
+  .button:focus {
+    outline: 2px solid #4a69bd;
+    outline-offset: 2px;
+  }
+  
+  .button.primary {
     background-color: #4a69bd;
     color: white;
+    border-color: #4a69bd;
   }
   
-  .primary:hover {
+  .button.primary:hover {
     background-color: #3c5aa6;
+    border-color: #3c5aa6;
+  }
+  
+  .button.primary:focus {
+    outline-color: #ffffff;
   }
   
   @media (max-width: 480px) {

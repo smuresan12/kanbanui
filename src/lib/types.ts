@@ -1,5 +1,7 @@
 export const COLUMNS: string[] = ['Backlog', 'To Do'/*, 'In Progress'*/, 'Done'];
 
+export type Column = typeof COLUMNS[number];
+
 export interface Sticky {
   id: string;
   text: string;
@@ -15,4 +17,5 @@ export interface KanbanState {
   usedColors: string[]; // Colors already used for easy suggestion
   lastBackupDate: string | null; // ISO date string when last backup was made
   disableBackupReminders?: boolean; // Flag to disable backup reminders
+  lastSkippedDate?: string | null; // ISO date string when user last skipped backup for a week
 } 

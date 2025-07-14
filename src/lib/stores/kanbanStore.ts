@@ -1,11 +1,12 @@
 import { writable } from 'svelte/store';
-import type { KanbanState, Sticky } from '../types';
+import type { KanbanState, Sticky, Column } from '../types';
 
 // Initial state
 const defaultState: KanbanState = {
   stickies: [],
   usedColors: ['#4c90e1', '#50aec7', '#89d2a4', '#ed706a', '#f4b450', '#ec5fa1'],
-  lastBackupDate: null
+  lastBackupDate: null,
+  lastSkippedDate: null
 };
 
 // Check for reset parameter in URL
@@ -399,6 +400,17 @@ const createKanbanStore = () => {
         return false;
       }
       
+      const now = new Date();
+      const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+      
+      // If user skipped recently (within 7 days), don't show reminder
+      if (state.lastSkippedDate) {
+        const lastSkipped = new Date(state.lastSkippedDate);
+        if (lastSkipped > sevenDaysAgo) {
+          return false;
+        }
+      }
+      
       // If no backup has ever been made, we need a reminder
       if (!state.lastBackupDate) {
         return true;
@@ -406,9 +418,6 @@ const createKanbanStore = () => {
       
       // Check if the last backup was more than 7 days ago
       const lastBackup = new Date(state.lastBackupDate);
-      const now = new Date();
-      const sevenDaysAgo = new Date(now.setDate(now.getDate() - 7));
-      
       return lastBackup < sevenDaysAgo;
     },
     
@@ -419,6 +428,7 @@ const createKanbanStore = () => {
           stickies: state.stickies,
           usedColors: defaultState.usedColors,
           lastBackupDate: null,
+          lastSkippedDate: null,
           disableBackupReminders: false
         };
         
@@ -438,6 +448,20 @@ const createKanbanStore = () => {
         
         // Save to IndexedDB
         saveState(newState).catch(err => console.error('Error disabling backup reminders', err));
+        return newState;
+      });
+    },
+    
+    // Skip backup reminder for one week
+    skipBackupForWeek: () => {
+      update(state => {
+        const newState = {
+          ...state,
+          lastSkippedDate: new Date().toISOString()
+        };
+        
+        // Save to IndexedDB
+        saveState(newState).catch(err => console.error('Error skipping backup for week', err));
         return newState;
       });
     }
