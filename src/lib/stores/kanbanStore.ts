@@ -166,11 +166,12 @@ const createKanbanStore = () => {
     subscribe,
     
     // Add a new sticky
-    addSticky: (text: string, color: string, column: Column) => {
+    addSticky: (patientName: string, notes: string, color: string, column: Column) => {
       update(state => {
         const newSticky: Sticky = {
           id: crypto.randomUUID(),
-          text,
+          patientName,
+          notes,
           color,
           column,
           createdAt: new Date().toISOString()
@@ -200,7 +201,8 @@ const createKanbanStore = () => {
             // Create a new sticky with the updates applied
             const updatedSticky: Sticky = { ...sticky };
             // Apply each update in a type-safe way
-            if (typeof updates.text === 'string') updatedSticky.text = updates.text;
+            if (typeof updates.patientName === 'string') updatedSticky.patientName = updates.patientName;
+            if (typeof updates.notes === 'string') updatedSticky.notes = updates.notes;
             if (typeof updates.color === 'string') updatedSticky.color = updates.color;
             if (updates.column && typeof updates.column === 'string') {
               updatedSticky.column = updates.column;
@@ -208,7 +210,7 @@ const createKanbanStore = () => {
             
             // Apply any other properties that match the index signature
             Object.entries(updates).forEach(([key, value]) => {
-              if (key !== 'text' && key !== 'color' && key !== 'column') {
+              if (key !== 'patientName' && key !== 'notes' && key !== 'color' && key !== 'column') {
                 if (typeof value === 'string' || typeof value === 'boolean') {
                   updatedSticky[key] = value;
                 }

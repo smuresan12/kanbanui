@@ -53,40 +53,44 @@
   $: isDragged = sticky && SHADOW_ITEM_MARKER_PROPERTY_NAME in sticky && 
                  Boolean(sticky[SHADOW_ITEM_MARKER_PROPERTY_NAME]);
   
-  let editableText = sticky.text;
+  let editablePatientName = sticky.patientName;
+  let editableNotes = sticky.notes;
   let editableColor = sticky.color;
   let usedColors: string[] = [];
   let editForm: HTMLDivElement;
   let stickyElement: HTMLDivElement;
-  let textElement: HTMLParagraphElement;
+  let patientNameElement: HTMLHeadingElement;
+  let notesElement: HTMLParagraphElement;
   let stickyWidth = 0;
   let contentLength = 0;
   
   // Calculate font size based on content length and width
   $: {
-    contentLength = sticky.text.length;
+    contentLength = sticky.patientName.length + sticky.notes.length;
   }
   
   // Function to update font size based on sticky width
   function updateFontSize() {
-    if (!textElement || !stickyElement) return;
+    if (!patientNameElement || !notesElement || !stickyElement) return;
     
     stickyWidth = stickyElement.clientWidth;
     
-    // Base size on content length and sticky width
-    let fontSize = 20; // Default size
+    // Patient name font size (always larger)
+    let patientNameFontSize = Math.max(16, Math.min(20, stickyWidth / 8));
     
-    if (contentLength > 100) {
-      fontSize = Math.max(16, Math.min(20, stickyWidth / 15));
-    } else if (contentLength > 50) {
-      fontSize = Math.max(18, Math.min(22, stickyWidth / 13));
-    } else if (contentLength > 20) {
-      fontSize = Math.max(20, Math.min(24, stickyWidth / 12));
+    // Notes font size (smaller, based on content length)
+    let notesFontSize = 14; // Default size
+    
+    if (sticky.notes.length > 100) {
+      notesFontSize = Math.max(12, Math.min(14, stickyWidth / 18));
+    } else if (sticky.notes.length > 50) {
+      notesFontSize = Math.max(13, Math.min(15, stickyWidth / 16));
     } else {
-      fontSize = Math.max(22, Math.min(26, stickyWidth / 10));
+      notesFontSize = Math.max(14, Math.min(16, stickyWidth / 14));
     }
     
-    textElement.style.fontSize = `${fontSize}px`;
+    patientNameElement.style.fontSize = `${patientNameFontSize}px`;
+    notesElement.style.fontSize = `${notesFontSize}px`;
   }
   
   // Update font size after the component is rendered
@@ -156,9 +160,10 @@
   }
   
   function handleSave() {
-    if (editableText.trim()) {
+    if (editablePatientName.trim()) {
       kanbanStore.updateSticky(sticky.id, {
-        text: editableText,
+        patientName: editablePatientName,
+        notes: editableNotes,
         color: editableColor
       });
     }
@@ -168,7 +173,8 @@
   
   function handleCancel() {
     isEditing = false;
-    editableText = sticky.text;
+    editablePatientName = sticky.patientName;
+    editableNotes = sticky.notes;
     editableColor = sticky.color;
     dispatch('editDone', { id: sticky.id });
     // Force a focus on the document body to ensure form loses focus
@@ -191,7 +197,7 @@
     if (isEditing && editForm && 
         !editForm.contains(event.target as Node)) {
       
-      if (editableText.trim()) {
+      if (editablePatientName.trim()) {
         handleSave();
       } else {
         handleCancel();
@@ -217,20 +223,29 @@
   class="sticky"
   class:is-dragged={isDragged}
   style="background-color: {sticky.color};"
-  class:long-text={sticky.text.length > 100}
-  class:medium-text={sticky.text.length > 50 && sticky.text.length <= 100}
-  class:short-text={sticky.text.length > 20 && sticky.text.length <= 50}
-  class:very-short-text={sticky.text.length <= 20}
+  class:long-text={contentLength > 100}
+  class:medium-text={contentLength > 50 && contentLength <= 100}
+  class:short-text={contentLength > 20 && contentLength <= 50}
+  class:very-short-text={contentLength <= 20}
   bind:this={stickyElement}
   data-is-handle="true"
 >
   {#if isEditing}
     <div class="sticky-edit" bind:this={editForm} on:click|stopPropagation>
-      <textarea 
-        bind:value={editableText}
+      <input
+        type="text"
+        bind:value={editablePatientName}
         on:keydown={handleKeyDown}
-        placeholder="Enter sticky text..."
+        placeholder="Patient name..."
         autoFocus
+        class="patient-name-input"
+      />
+      
+      <textarea 
+        bind:value={editableNotes}
+        on:keydown={handleKeyDown}
+        placeholder="Notes about the patient..."
+        class="notes-textarea"
       ></textarea>
       
       <div class="color-selector">
@@ -289,7 +304,14 @@
       tabindex="0"
       aria-label="Edit sticky note"
     >
-      <p style="color: {textColor};" bind:this={textElement}>{sticky.text}</p>
+      <h3 class="patient-name" style="color: {textColor};" bind:this={patientNameElement}>
+        {sticky.patientName}
+      </h3>
+      {#if sticky.notes.trim()}
+        <p class="patient-notes" style="color: {textColor};" bind:this={notesElement}>
+          {sticky.notes}
+        </p>
+      {/if}
     </div>
   {/if}
 </div>
@@ -318,10 +340,11 @@
     transform: rotate(var(--rotate, -1deg));
     --rotate: calc(-2deg + (Math.random() * 4deg));
     border-bottom-right-radius: 60px 5px;
-    min-height: 70px;
+    min-height: 90px;
     display: flex;
     flex-direction: column;
     flex-shrink: 0;
+    border-top: 3px solid rgba(0, 0, 0, 0.1);
   }
   
   /* Font size controlled by JavaScript for better width-based scaling */
@@ -391,11 +414,50 @@
   }
   
   .sticky-content {
-    min-height: 40px;
+    min-height: 60px;
     flex: 1;
     display: flex;
-    align-items: center;
-    justify-content: center;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+    padding: 4px;
+    gap: 4px;
+  }
+  
+  .patient-name {
+    margin: 0 0 8px 0;
+    font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    line-height: 1.3;
+    text-shadow: none;
+    width: 100%;
+    box-sizing: border-box;
+    transition: color 0.2s ease;
+    font-weight: 700;
+    text-align: center;
+    border-bottom: 2px solid rgba(0, 0, 0, 0.15);
+    padding-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 16px;
+  }
+  
+  .patient-notes {
+    margin: 8px 0 0 0;
+    font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    line-height: 1.4;
+    text-shadow: none;
+    width: 100%;
+    box-sizing: border-box;
+    transition: color 0.2s ease;
+    font-weight: 400;
+    text-align: left;
+    font-style: normal;
+    font-size: 14px;
+    padding: 8px;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    border-left: 3px solid rgba(0, 0, 0, 0.2);
+    min-height: 20px;
   }
   
  .delete-btn {
@@ -429,7 +491,28 @@
     gap: 8px;
   }
   
-  .sticky-edit textarea {
+  .patient-name-input {
+    width: 100%;
+    padding: 6px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 3px;
+    font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    background-color: white;
+    color: black;
+    margin-bottom: 4px;
+    border-left: 4px solid #4a69bd;
+  }
+  
+  .patient-name-input:focus {
+    outline: none;
+    border-color: #4a69bd;
+    box-shadow: 0 0 0 2px rgba(74, 105, 189, 0.2);
+    border-left-color: #2c4aa6;
+  }
+  
+  .notes-textarea {
     width: 100%;
     min-height: 60px;
     padding: 6px;
@@ -440,6 +523,14 @@
     font-size: 14px;
     background-color: white;
     color: black;
+    border-left: 4px solid #50aec7;
+  }
+  
+  .notes-textarea:focus {
+    outline: none;
+    border-color: #4a69bd;
+    box-shadow: 0 0 0 2px rgba(74, 105, 189, 0.2);
+    border-left-color: #2c4aa6;
   }
   
   .color-selector {
@@ -543,23 +634,19 @@
     
     .sticky {
       padding: 8px;
-      min-height: 55px;
+      min-height: 75px;
     }
     
-    .sticky.very-short-text p {
-      font-size: min(20px, 5.5cqw);
-    }
-    
-    .sticky.short-text p {
-      font-size: min(18px, 5cqw);
-    }
-    
-    .sticky.medium-text p {
+    .patient-name {
       font-size: min(16px, 4.5cqw);
+      margin-bottom: 6px;
+      padding-bottom: 4px;
     }
     
-    .sticky.long-text p {
-      font-size: min(14px, 4cqw);
+    .patient-notes {
+      font-size: min(13px, 3.5cqw);
+      padding: 6px;
+      margin-top: 6px;
     }
     
     .delete-btn {
@@ -568,8 +655,12 @@
       font-size: 13px;
     }
     
-    .sticky-edit textarea {
+    .notes-textarea {
       min-height: 50px;
+      font-size: 13px;
+    }
+    
+    .patient-name-input {
       font-size: 13px;
     }
     
@@ -589,23 +680,19 @@
     
     .sticky {
       padding: 6px;
-      min-height: 50px;
+      min-height: 65px;
     }
     
-    .sticky.very-short-text p {
-      font-size: min(18px, 5cqw);
-    }
-    
-    .sticky.short-text p {
-      font-size: min(16px, 4.5cqw);
-    }
-    
-    .sticky.medium-text p {
+    .patient-name {
       font-size: min(14px, 4cqw);
+      margin-bottom: 4px;
+      padding-bottom: 3px;
     }
     
-    .sticky.long-text p {
+    .patient-notes {
       font-size: min(12px, 3.5cqw);
+      padding: 4px;
+      margin-top: 4px;
     }
     
     .delete-btn {
@@ -614,9 +701,14 @@
       font-size: 12px;
     }
     
-    .sticky-edit textarea {
+    .notes-textarea {
       min-height: 45px;
       padding: 4px;
+    }
+    
+    .patient-name-input {
+      padding: 4px;
+      font-size: 12px;
     }
     
     .color-option {

@@ -11,7 +11,8 @@
   export let stickies: StickyType[] = [];
   
   let isAddingSticky = false;
-  let newStickyText = '';
+  let newPatientName = '';
+  let newNotes = '';
   let newStickyColor = '#ffcc00';
   let editingStickyId: string | null = null;
   let addStickyForm: HTMLDivElement;
@@ -26,9 +27,10 @@
   });
   
   function handleAddSticky() {
-    if (newStickyText.trim()) {
-      kanbanStore.addSticky(newStickyText.trim(), newStickyColor, column);
-      newStickyText = '';
+    if (newPatientName.trim()) {
+      kanbanStore.addSticky(newPatientName.trim(), newNotes.trim(), newStickyColor, column);
+      newPatientName = '';
+      newNotes = '';
       isAddingSticky = false;
     }
   }
@@ -72,7 +74,7 @@
         !addStickyForm.contains(event.target as Node) && 
         !(event.target as HTMLElement).classList.contains('add-sticky-btn')) {
       
-      if (newStickyText.trim()) {
+      if (newPatientName.trim()) {
         handleAddSticky();
       } else {
         isAddingSticky = false;
@@ -82,7 +84,8 @@
   
   function handleCancelBtn() {
     isAddingSticky = false;
-    newStickyText = '';
+    newPatientName = '';
+    newNotes = '';
     // Force a focus on the document body to ensure form loses focus
     if (typeof document !== 'undefined') {
       document.body.focus();
@@ -167,11 +170,20 @@
   
   {#if isAddingSticky}
     <div class="add-sticky-form" bind:this={addStickyForm} on:click|stopPropagation>
-      <textarea
-        bind:value={newStickyText}
+      <input
+        type="text"
+        bind:value={newPatientName}
         on:keydown={handleKeyDown}
-        placeholder="Enter sticky text..."
+        placeholder="Patient name..."
         autoFocus
+        class="patient-name-input"
+      />
+      
+      <textarea
+        bind:value={newNotes}
+        on:keydown={handleKeyDown}
+        placeholder="Notes about the patient..."
+        class="notes-textarea"
       ></textarea>
       
       <div class="color-selector">
@@ -399,7 +411,28 @@
     flex-shrink: 0; /* Prevent form from shrinking */
   }
   
-  textarea {
+  .patient-name-input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin-bottom: 8px;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    background-color: white;
+    color: black;
+    border-left: 4px solid #4a69bd;
+  }
+  
+  .patient-name-input:focus {
+    outline: none;
+    border-color: #4a69bd;
+    box-shadow: 0 0 0 2px rgba(74, 105, 189, 0.2);
+    border-left-color: #2c4aa6;
+  }
+  
+  .notes-textarea {
     width: 100%;
     min-height: 70px;
     padding: 8px;
@@ -411,11 +444,14 @@
     resize: vertical;
     background-color: white;
     color: black;
+    border-left: 4px solid #50aec7;
   }
   
-  textarea:focus {
+  .notes-textarea:focus {
     outline: none;
-    border-color: #aaa;
+    border-color: #4a69bd;
+    box-shadow: 0 0 0 2px rgba(74, 105, 189, 0.2);
+    border-left-color: #2c4aa6;
   }
   
   .color-selector {

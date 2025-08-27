@@ -4,7 +4,8 @@ export type Column = typeof COLUMNS[number];
 
 export interface Sticky {
   id: string;
-  text: string;
+  patientName: string;
+  notes: string;
   color: string;
   column: string;
   createdAt: string; // ISO date string

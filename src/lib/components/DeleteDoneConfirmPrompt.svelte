@@ -38,7 +38,10 @@
         <ul>
           {#each stickies as sticky}
             <li style="background-color: {sticky.color};">
-              {sticky.text}
+              <strong>{sticky.patientName}</strong>
+              {#if sticky.notes.trim()}
+                <br><em>{sticky.notes}</em>
+              {/if}
               <small>Created: {new Date(sticky.createdAt).toLocaleDateString()}</small>
             </li>
           {/each}
