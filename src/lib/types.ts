@@ -1,4 +1,4 @@
-export const COLUMNS: string[] = ['Backlog', 'To Do'/*, 'In Progress'*/, 'Done'];
+export const COLUMNS: string[] = ['To Do', 'In Progress'/*, 'In Progress'*/, 'Booked'];
 
 export type Column = typeof COLUMNS[number];
 
